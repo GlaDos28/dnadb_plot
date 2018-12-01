@@ -2,6 +2,8 @@ package ru.bmstu.bioinformatics.scoring
 
 import java.io.File
 
+import ru.bmstu.bioinformatics.Utils
+
 import scala.collection.mutable
 import scala.io.Source
 
@@ -13,7 +15,7 @@ object WeightMatrix {
   def readDefault: KeyMatrix = fromResource("protein.mtx")
 
   def fromResource(name: String): KeyMatrix = {
-    fromFile(getResourceFile(name))
+    fromFile(Utils.resourceFile(name))
   }
 
   /** Any lines starting with # are discarded
@@ -77,8 +79,4 @@ object WeightMatrix {
   }
 
   private def splitBySpaces(str: String) = str.split("\\s+")
-
-  private def getResourceFile(fileName: String): File = {
-    new File(getClass.getClassLoader.getResource(fileName).toURI)
-  }
 }

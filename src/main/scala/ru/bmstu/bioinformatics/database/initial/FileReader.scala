@@ -1,4 +1,4 @@
-package ru.bmstu.bioinformatics.database
+package ru.bmstu.bioinformatics.database.initial
 
 import java.io.File
 

@@ -1,4 +1,4 @@
-package ru.bmstu.bioinformatics.database
+package ru.bmstu.bioinformatics.database.initial
 
 case class DbEntry(value: (String, String)) extends AnyVal {
 
