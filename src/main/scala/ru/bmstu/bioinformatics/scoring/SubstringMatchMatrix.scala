@@ -2,13 +2,12 @@ package ru.bmstu.bioinformatics.scoring
 
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
-/** Represents symmetrical weight matrix, where keys are strings of a given size. */
-object SubstringWeightMatrix {
+/** Represents match matrix, where keys are strings of a given size. */
+object SubstringMatchMatrix {
 
-  type SubstringWeightMatrix = Map[(String, String), Int]
+  type SubstringMatchMatrix = Map[String, Int]
 
-  /** In order to satisfy symmetry property for [[SubstringWeightMatrix]], [[KeyMatrix]] is assumed to be symmetrical as well*/
-  def apply(m: KeyMatrix, size: Int = 2): SubstringWeightMatrix = {
+  def apply(m: KeyMatrix, size: Int = 2): SubstringMatchMatrix = {
     val chars = m.keys.map(_._1)
     apply(m, allStrings(chars, size - 1, chars.map(_.toString)))
   }
@@ -25,19 +24,14 @@ object SubstringWeightMatrix {
     }
   }
 
-  private def apply(m: KeyMatrix, keys: Iterable[String]): SubstringWeightMatrix = {
-    println(keys.size)
+  private def apply(m: KeyMatrix, keys: Iterable[String]): SubstringMatchMatrix = {
     val init = for {
       s1 <- keys
-      s2 <- keys if s2 >= s1
     } yield {
-      (s1, s2) -> computeScore(m, s1, s2)
+      s1 -> computeScore(m, s1, s1)
     }
 
-    val map = init.toMap
-    map.withDefault {
-      case (s1, s2) if s2 < s1 => map(s2, s1)
-    }
+    init.toMap
   }
 
   private def computeScore(m: KeyMatrix, s1: String, s2: String): Int = {

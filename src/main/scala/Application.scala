@@ -1,10 +1,10 @@
-import ru.bmstu.bioinformatics.scoring.{SubstringWeightMatrix, WeightMatrix}
+import ru.bmstu.bioinformatics.scoring.{SubstringMatchMatrix, WeightMatrix}
 
 object Application {
 
   def main(args: Array[String]): Unit = {
 
-    val sstrwm = SubstringWeightMatrix(WeightMatrix.readDefault)
+    val sstrwm = SubstringMatchMatrix(WeightMatrix.readDefault)
     println(sstrwm.size)
     sstrwm.foreach(println)
   }
