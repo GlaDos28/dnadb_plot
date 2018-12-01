@@ -9,7 +9,9 @@ import ru.bmstu.bioinformatics.Utils
 
 object FileReader {
 
-  def default: Iterator[DbEntry] = apply(Utils.resourceFile("converted.db"))
+  lazy val defaultFile: File = Utils.resourceFile("converted.db")
+
+  def default: Iterator[DbEntry] = apply(defaultFile)
 
   def apply(file: File): Iterator[DbEntry] = {
     Source.fromFile(file)
