@@ -5,21 +5,23 @@ import java.io.File
 import scala.collection.mutable
 import scala.io.Source
 
+/** Represents symmetrical weight matrix */
 object WeightMatrix {
 
   type KeyMatrix = Map[(Char, Char), Int]
 
-  def default: KeyMatrix = fromResource("protein.mtx")
+  def readDefault: KeyMatrix = fromResource("protein.mtx")
 
   def fromResource(name: String): KeyMatrix = {
     fromFile(getResourceFile(name))
   }
 
-  /* Any lines starting with # are discarded
-    The first line (excluding comments) should contain only space separated latin characters or
-    an asterisk (any not-stated latin character)
-    The body of the (square) matrix should consist of lines starting with a latin character or
-    an asterisk which is followed by a series of numbers corresponding to the size of the matrix
+  /** Any lines starting with # are discarded
+    * The first line (excluding comments) should contain only space separated latin characters or
+    * an asterisk (any not-stated latin character)
+    * The body of the (square) matrix should consist of lines starting with a latin character on
+    * an asterisk which is followed by a series of numbers corresponding to the size of the matrix.
+    * @return symmetrical weight matrix of keys
    */
   def fromFile(fileInput: File): KeyMatrix = {
     val builder = mutable.HashMap[(Char, Char), Int]()
