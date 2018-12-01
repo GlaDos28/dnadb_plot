@@ -5,6 +5,8 @@ import java.io.File
 object Utils {
 
   def resourceFile(fileName: String): File = {
-    new File(getClass.getClassLoader.getResource(fileName).toURI)
+    println(fileName)
+    println(getClass.getClassLoader.getResource(""))
+    new File(getClass.getClassLoader.getResource("").getPath + fileName)
   }
 }

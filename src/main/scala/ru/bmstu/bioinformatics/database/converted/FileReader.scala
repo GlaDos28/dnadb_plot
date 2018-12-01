@@ -3,9 +3,10 @@ package ru.bmstu.bioinformatics.database.converted
 import java.io.File
 import java.nio.ByteBuffer
 
-import scala.io.Source
 import boopickle.Default._
 import ru.bmstu.bioinformatics.Utils
+
+import scala.io.Source
 
 object FileReader {
 
