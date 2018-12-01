@@ -11,7 +11,7 @@ object FileReader {
     override def getMessage: String = s"Invalid sequence format in file [$file]"
   }
 
-  def apply(file: File): Iterator[DbEntry] = {
+  def read(file: File): Iterator[DbEntry] = {
       groupedIterator(file).map { case (name, content) => DbEntry((name, content)) }
   }
 
