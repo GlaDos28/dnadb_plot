@@ -12,7 +12,7 @@ object DotPlot {
 
   def substrings(s: String, size: Int = 2): Vector[String] = {
     val ss = for {
-      i <- s.indices.toString().dropRight(size - 1)
+      i <- s.indices.dropRight(size - 1)
     } yield s.substring(i, i + size)
     ss.toVector
   }
