@@ -11,7 +11,6 @@ object Application {
   def main(args: Array[String]): Unit = {
     val ssmm = SubstringMatchMatrix(WeightMatrix.readDefault)
 
-    DatabaseOperator.drop()
     DatabaseOperator.init()
 
     val converted = Converter.convert(OldDbReader.read(Utils.resourceFile("uniprot_sprot.fasta")))
