@@ -1,15 +1,13 @@
 package ru.bmstu.bioinformatics.database.converted
 
-import java.io._
 import java.nio.ByteBuffer
 
 import boopickle.Default._
-import ru.bmstu.bioinformatics.Utils
+import ru.bmstu.bioinformatics.Utils._
 import slick.basic.DatabasePublisher
 import slick.jdbc.SQLiteProfile.api._
 
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 object DatabaseOperator {
 
@@ -24,6 +22,10 @@ object DatabaseOperator {
   private lazy val db = Database.forConfig("dnadb")
   private lazy val table = TableQuery[DnaTable]
 
+  def drop(): Future[Unit] = {
+    db.run(DBIO.seq(table.schema.drop))
+  }
+
   def init(): Future[Unit] = {
     db.run(DBIO.seq(table.schema.create))
   }
@@ -36,13 +38,15 @@ object DatabaseOperator {
   }
 
   def write(insert: Iterator[DbEntry]): Unit = {
+    var size = 0
     for {
-      entries <- insert.grouped(10)
+      entries <- insert.grouped(100)
     } {
       val i = entries.map { case DbEntry((name, substrings)) => (name, Pickle.intoBytes(substrings).array()) }
       val q = DBIO.seq(table.map(t => (t.name, t.bob)) ++= i)
-      Await.result(db.run(q), Duration.Inf)
-      println("done")
+      db.run(q).await()
+      size += i.size
+      println(s"Loaded: $size")
     }
   }
 }
