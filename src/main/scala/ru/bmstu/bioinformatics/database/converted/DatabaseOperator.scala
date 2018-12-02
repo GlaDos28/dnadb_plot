@@ -6,8 +6,9 @@ import boopickle.Default._
 import ru.bmstu.bioinformatics.Utils._
 import slick.basic.DatabasePublisher
 import slick.jdbc.SQLiteProfile.api._
+import slick.jdbc.meta.MTable
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object DatabaseOperator {
 
@@ -22,12 +23,17 @@ object DatabaseOperator {
   private lazy val db = Database.forConfig("dnadb")
   private lazy val table = TableQuery[DnaTable]
 
-  def drop(): Future[Unit] = {
-    db.run(DBIO.seq(table.schema.drop))
+  def drop(): Unit = {
+
+    db.run(DBIO.seq(MTable.getTables.map { ts =>
+      if (ts.exists(_.name == dnaTableName)) {
+        table.schema.drop
+      }
+    })).await()
   }
 
-  def init(): Future[Unit] = {
-    db.run(DBIO.seq(table.schema.create))
+  def init(): Unit = {
+    db.run(DBIO.seq(table.schema.create)).await()
   }
 
   def read(): DatabasePublisher[DbEntry] = {
