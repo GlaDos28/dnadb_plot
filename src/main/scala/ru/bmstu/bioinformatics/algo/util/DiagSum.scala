@@ -1,7 +1,7 @@
 package ru.bmstu.bioinformatics.algo.util
 
 import ru.bmstu.bioinformatics.algo.Preamble._
-import ru.bmstu.bioinformatics.algo.input.DotMatrix
+import ru.bmstu.bioinformatics.algo.util.DotPlot.DotPlot
 
 /* Mutable */
 class DiagSum(val iLen: Int, val jLen: Int, k: Int, val data: collection.mutable.IndexedSeq[Int]) {
@@ -34,11 +34,11 @@ class DiagSum(val iLen: Int, val jLen: Int, k: Int, val data: collection.mutable
 }
 
 object DiagSum {
-    def fromDotMatrix(dm: DotMatrix, rowNum: Int, colNum: Int, k: Int): DiagSum = {
+    def fromDotMatrix(dm: DotPlot, rowNum: Int, colNum: Int, k: Int): DiagSum = {
         val diagSum = new DiagSum(rowNum, colNum, k)
 
-        for (el <- dm.dotIterator) {
-            diagSum.inc(el._1._1 - el._1._2)
+        for (((i, j), _) <- dm.iterator) {
+            diagSum.inc(i - j)
         }
 
         diagSum

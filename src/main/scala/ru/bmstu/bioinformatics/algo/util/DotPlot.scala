@@ -1,4 +1,4 @@
-package ru.bmstu.bioinformatics.dotplot
+package ru.bmstu.bioinformatics.algo.util
 
 import ru.bmstu.bioinformatics.scoring.SubstringMatchMatrix.SubstringMatchMatrix
 

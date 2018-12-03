@@ -1,7 +1,7 @@
 package ru.bmstu.bioinformatics.database.converted
 
+import ru.bmstu.bioinformatics.algo.util.DotPlot
 import ru.bmstu.bioinformatics.database.initial.{DbEntry => OldDbEntry}
-import ru.bmstu.bioinformatics.dotplot.DotPlot
 
 object Converter {
 
