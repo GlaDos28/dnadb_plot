@@ -37,4 +37,15 @@ object DotPlot {
 
     init.toMap.withDefaultValue(0)
   }
+
+  def toString(substrings: Vector[String], size: Int = 2): String = {
+    val b = new StringBuilder()
+    b.append(substrings(0))
+
+    substrings.drop(1).foreach { s =>
+      b.append(s.last)
+    }
+
+    b.toString()
+  }
 }
