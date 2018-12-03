@@ -7,12 +7,8 @@ import scala.io.Source
 /** File reader for protein database */
 object FileReader {
 
-  case class InvalidFileFormatException(file: File) extends Throwable {
-    override def getMessage: String = s"Invalid sequence format in file [$file]"
-  }
-
   def read(file: File): Iterator[DbEntry] = {
-      groupedIterator(file).map { case (name, content) => DbEntry((name, content)) }
+    groupedIterator(file).map { case (name, content) => DbEntry((name, content)) }
   }
 
   private def groupedIterator(file: File): Iterator[(String, String)] = {
@@ -40,4 +36,8 @@ object FileReader {
   }
 
   private def isCaptionLine(str: String): Boolean = str.startsWith(">")
+
+  case class InvalidFileFormatException(file: File) extends Throwable {
+    override def getMessage: String = s"Invalid sequence format in file [$file]"
+  }
 }

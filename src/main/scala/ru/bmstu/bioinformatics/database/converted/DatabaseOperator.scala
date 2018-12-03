@@ -9,25 +9,18 @@ import slick.jdbc.SQLiteProfile.api._
 
 object DatabaseOperator {
 
-  private val dnaTableName = "converted"
-  private class DnaTable(tag: Tag) extends Table[(Long, String, Array[Byte])](tag, dnaTableName) {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
-    def bob = column[Array[Byte]]("bob")
-    def * = (id, name, bob)
-  }
-
   private lazy val db = Database.forConfig("dnadb")
   private lazy val table = TableQuery[DnaTable]
+  private val dnaTableName = "converted"
 
   def init(): Unit = {
     db.run(DBIO.seq(table.schema.create)).await()
   }
 
-  def read(): DatabasePublisher[DbEntry] = {
-    val q = for(dna <- table) yield (dna.name, dna.bob)
+  def read(): DatabasePublisher[(Long, DbEntry)] = {
+    val q = for (dna <- table) yield (dna.id, dna.name, dna.bob)
     db.stream(q.result).mapResult {
-      case (name, bob) => DbEntry((name, Unpickle.apply[Vector[String]].fromBytes(ByteBuffer.wrap(bob))))
+      case (id, name, bob) => id -> DbEntry((name, Unpickle.apply[Vector[String]].fromBytes(ByteBuffer.wrap(bob))))
     }
   }
 
@@ -42,5 +35,15 @@ object DatabaseOperator {
       size += i.size
       println(s"Loaded: $size")
     }
+  }
+
+  private class DnaTable(tag: Tag) extends Table[(Long, String, Array[Byte])](tag, dnaTableName) {
+    def * = (id, name, bob)
+
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def name = column[String]("name")
+
+    def bob = column[Array[Byte]]("bob")
   }
 }

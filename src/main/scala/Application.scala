@@ -26,7 +26,7 @@ object Application {
 
     val substrings = DotPlot.substrings(seq)
 
-    DatabaseOperator.read().foreach { entry =>
+    DatabaseOperator.read().foreach { case (id, entry) =>
       val dotplot = DotPlot.apply(ssmm, entry.substrings, substrings)
       val seqPair = SeqPair(DotPlot.toString(entry.substrings), seq)
 
@@ -37,6 +37,8 @@ object Application {
       val strips        = Strip.scanlineDiagsFitStrip(stripMaxWidth)(bestOffsets)
       val stripAligns   = strips.map(_.smithWatermanScore(gapPenalty)(seqPair, weightMatrix))
       val alignRes      = AlignResult.fromStripAligns(stripAligns)
+
+      println(s"$id -> ${alignRes.score}")
     }.await()
   }
 }

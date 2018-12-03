@@ -27,11 +27,7 @@ class Strip private(val diags: List[Diagonal]) {
 
     /* First row elements */
 
-    var rowScore = ListBuffer[Int]()
-
-    for (_ <- 0 to curLastColInd - curFirstColInd + 2) {
-      rowScore += 0
-    }
+    var rowScore = ListBuffer.fill(curLastColInd - curFirstColInd + 3)(0)
 
     /* --- */
 
@@ -63,6 +59,7 @@ class Strip private(val diags: List[Diagonal]) {
       }
 
       newRowScore += -1000000 /* To prevent using non-strip elements */
+      newRowScore += -1000000
       rowScore = newRowScore
 
       cnt += 1

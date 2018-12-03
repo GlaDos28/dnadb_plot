@@ -23,8 +23,9 @@ object WeightMatrix {
     * an asterisk (any not-stated latin character)
     * The body of the (square) matrix should consist of lines starting with a latin character on
     * an asterisk which is followed by a series of numbers corresponding to the size of the matrix.
+    *
     * @return symmetrical weight matrix of keys
-   */
+    */
   def fromFile(fileInput: File): KeyMatrix = {
     val builder = mutable.HashMap[(Char, Char), Int]()
     val names :: body = Source.fromFile(fileInput)
@@ -57,7 +58,9 @@ object WeightMatrix {
               for {
                 n1 <- excludedSet
                 n2 <- excludedSet
-              } { builder.update((n1, n2), weight) }
+              } {
+                builder.update((n1, n2), weight)
+              }
 
             case ('*', colName) =>
               excludedSet.foreach(n => builder.update((n, colName), weight))
@@ -66,7 +69,7 @@ object WeightMatrix {
               excludedSet.foreach(n => builder.update((rowName, n), weight))
 
             case (_, colName) =>
-              builder.update((rowName, colName) , weight)
+              builder.update((rowName, colName), weight)
           }
         }
     }
