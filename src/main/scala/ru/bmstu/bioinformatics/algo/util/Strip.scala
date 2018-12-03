@@ -1,8 +1,9 @@
 package ru.bmstu.bioinformatics.algo.util
 
 import ru.bmstu.bioinformatics.algo.Preamble._
-import ru.bmstu.bioinformatics.algo.input.{ScoreTable, SeqPair}
+import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
+import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 import scala.collection.mutable.ListBuffer
 
@@ -11,7 +12,7 @@ class Strip private(val diags: List[Diagonal]) {
     def rightOffset: Int = diags.last
 
     def smithWatermanScore(gapPenalty: Int, outTable: Boolean = false)
-                          (implicit seqPair: SeqPair, scoreTable: ScoreTable): AlignResult = {
+                          (implicit seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
         val topBound    = leftOffset
         val bottomBound = rightOffset
 
@@ -42,7 +43,7 @@ class Strip private(val diags: List[Diagonal]) {
             newRowScore += -1000000 /* To prevent using non-strip elements */
 
             for (j <- curFirstColInd to curLastColInd) {
-                val stScore      = scoreTable.get(seqPair.s1(i), seqPair.s2(j))
+                val stScore      = scoreTable((seqPair.s1(i), seqPair.s2(j)))
                 val leftScore    = newRowScore.last
                 val topScore     = rowScore(j - curFirstColInd + 2)
                 val topLeftScore = rowScore(j - curFirstColInd + 1)
