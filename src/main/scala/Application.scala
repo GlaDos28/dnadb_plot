@@ -11,10 +11,10 @@ object Application {
   def main(args: Array[String]): Unit = {
     val ssmm = SubstringMatchMatrix(WeightMatrix.readDefault)
 
-    DatabaseOperator.init()
+//    DatabaseOperator.init()
 
-    val converted = Converter.convert(OldDbReader.read(Utils.resourceFile("uniprot_sprot.fasta")))
-    DatabaseOperator.write(converted)
+//    val converted = Converter.convert(OldDbReader.read(Utils.resourceFile("uniprot_sprot.fasta")))
+//    DatabaseOperator.write(converted)
 
     DatabaseOperator.read().foreach(println).await()
   }
