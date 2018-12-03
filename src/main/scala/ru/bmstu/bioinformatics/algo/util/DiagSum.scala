@@ -1,7 +1,7 @@
 package ru.bmstu.bioinformatics.algo.util
 
-import main.scala.ru.bmstu.bioinformatics.algo.Preamble._
-import main.scala.ru.bmstu.bioinformatics.algo.input.DotMatrix
+import ru.bmstu.bioinformatics.algo.Preamble._
+import ru.bmstu.bioinformatics.algo.input.DotMatrix
 
 /* Mutable */
 class DiagSum(val iLen: Int, val jLen: Int, k: Int, val data: collection.mutable.IndexedSeq[Int]) {

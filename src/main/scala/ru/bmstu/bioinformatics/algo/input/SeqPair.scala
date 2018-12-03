@@ -1,6 +1,6 @@
 package ru.bmstu.bioinformatics.algo.input
 
-import main.scala.ru.bmstu.bioinformatics.algo.util.Diagonal
+import ru.bmstu.bioinformatics.algo.util.Diagonal
 
 case class SeqPair(s1: String, s2: String) {
 

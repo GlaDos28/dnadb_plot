@@ -1,8 +1,8 @@
 package ru.bmstu.bioinformatics.algo.util
 
-import main.scala.ru.bmstu.bioinformatics.algo.Preamble._
-import main.scala.ru.bmstu.bioinformatics.algo.input.{ScoreTable, SeqPair}
-import main.scala.ru.bmstu.bioinformatics.algo.output.AlignResult
+import ru.bmstu.bioinformatics.algo.Preamble._
+import ru.bmstu.bioinformatics.algo.input.{ScoreTable, SeqPair}
+import ru.bmstu.bioinformatics.algo.output.AlignResult
 
 import scala.collection.mutable.ListBuffer
 
