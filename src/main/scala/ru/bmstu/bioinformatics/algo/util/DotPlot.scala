@@ -1,6 +1,7 @@
 package ru.bmstu.bioinformatics.algo.util
 
 import ru.bmstu.bioinformatics.scoring.SubstringMatchMatrix.SubstringMatchMatrix
+import scala.collection.mutable
 
 /** [[DotPlot]] is a map from an index pair (each corresponding to a start of a substring of a given size)
   * to the weight of the match.
@@ -9,12 +10,18 @@ import ru.bmstu.bioinformatics.scoring.SubstringMatchMatrix.SubstringMatchMatrix
 object DotPlot {
 
   type DotPlot = Map[(Int, Int), Int]
+  //Maps substrings to its positions in the sequence
+  type SubstringMap = Map[String, Set[Int]]
 
-  def substrings(s: String, size: Int = 2): Vector[String] = {
-    val ss = for {
+  def substringsMap(s: String, size: Int = 2): SubstringMap = {
+    val b = mutable.Map.empty[String, mutable.Set[Int]]
+    for {
       i <- s.indices.dropRight(size - 1)
-    } yield s.substring(i, i + size)
-    ss.toVector
+    } {
+      val ss = s.substring(i, i + size)
+      b.update(ss, b.getOrElse(ss, mutable.Set.empty) += i)
+    }
+    b.mapValues(_.toSet).toMap
   }
 
   def apply(m: SubstringMatchMatrix, s1: String, s2: String, size: Int = 2): DotPlot = {
@@ -27,15 +34,20 @@ object DotPlot {
     init.toMap.withDefaultValue(0)
   }
 
-  /** Compute [[DotPlot]] by given substrings */
-  def apply(m: SubstringMatchMatrix, ss1: Vector[String], ss2: Vector[String]): DotPlot = {
-    val init = for {
-      i1 <- ss1.indices
-      sub1 = ss1(i1)
-      i2 <- ss2.indices if sub1 == ss2(i2)
-    } yield (i1, i2) -> m(sub1)
+  /** Compute [[DotPlot]] by given substring maps */
+  def apply(m: SubstringMatchMatrix, ssm1: SubstringMap, ssm2: SubstringMap): DotPlot = {
+    val b = mutable.Map.empty[(Int, Int), Int]
+    val ks = ssm1.keySet.union(ssm2.keySet)
+    ks.foreach { ss =>
+      for {
+        i1 <- ssm1(ss)
+        i2 <- ssm2(ss)
+      } {
+        b.update((i1, i2), m(ss))
+      }
+    }
 
-    init.toMap.withDefaultValue(0)
+    b.toMap.withDefaultValue(0)
   }
 
   def toString(substrings: Vector[String], size: Int = 2): String = {

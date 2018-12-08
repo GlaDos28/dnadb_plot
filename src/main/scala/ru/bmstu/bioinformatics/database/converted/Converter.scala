@@ -7,7 +7,7 @@ object Converter {
 
   def convert(oldDb: Iterator[OldDbEntry], size: Int = 2): Iterator[DbEntry] = {
     oldDb.map { case OldDbEntry((name, sequence)) =>
-      DbEntry((name, DotPlot.substrings(sequence, size)))
+      DbEntry((name, sequence, DotPlot.substringsMap(sequence, size)))
     }
   }
 }
