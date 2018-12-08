@@ -1,6 +1,6 @@
 package ru.bmstu.bioinformatics.scoring
 
-import java.io.File
+import java.net.URL
 
 import ru.bmstu.bioinformatics.Utils
 
@@ -15,7 +15,7 @@ object WeightMatrix {
   def readDefault: KeyMatrix = fromResource("protein.mtx")
 
   def fromResource(name: String): KeyMatrix = {
-    fromFile(Utils.resourceFile(name))
+    fromURL(Utils.resourceURL(name))
   }
 
   /** Any lines starting with # are discarded
@@ -26,9 +26,9 @@ object WeightMatrix {
     *
     * @return symmetrical weight matrix of keys
     */
-  def fromFile(fileInput: File): KeyMatrix = {
+  def fromURL(fileInput: URL): KeyMatrix = {
     val builder = mutable.HashMap[(Char, Char), Int]()
-    val names :: body = Source.fromFile(fileInput)
+    val names :: body = Source.fromURL(fileInput)
       .getLines()
       .map(_.trim)
       .filter(!_.startsWith("#"))

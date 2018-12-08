@@ -1,14 +1,16 @@
 package ru.bmstu.bioinformatics
 
-import java.io.File
+import java.net.URL
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 
 object Utils {
 
-  def resourceFile(fileName: String): File = {
-    new File(getClass.getClassLoader.getResource("").getPath, fileName)
+  def resourceURL(fileName: String): URL = {
+    println(fileName)
+    println(getClass.getClassLoader.getResource(fileName))
+    getClass.getClassLoader.getResource(fileName)
   }
 
   implicit class AwaitSyntax[E](f: Future[E]) {
