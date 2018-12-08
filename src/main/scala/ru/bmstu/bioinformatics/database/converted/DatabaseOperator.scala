@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 
 import boopickle.Default._
 import ru.bmstu.bioinformatics.Utils._
+import ru.bmstu.bioinformatics.algo.util.DotPlot.SubstringMap
 import slick.basic.DatabasePublisher
 import slick.jdbc.SQLiteProfile.api._
 
@@ -18,9 +19,9 @@ object DatabaseOperator {
   }
 
   def read(): DatabasePublisher[(Long, DbEntry)] = {
-    val q = for (dna <- table) yield (dna.id, dna.name, dna.bob)
+    val q = for (dna <- table) yield (dna.id, dna.name, dna.sequence, dna.bob)
     db.stream(q.result).mapResult {
-      case (id, name, bob) => id -> DbEntry((name, Unpickle.apply[Vector[String]].fromBytes(ByteBuffer.wrap(bob))))
+      case (id, name, seq, bob) => id -> DbEntry((name, seq, Unpickle.apply[SubstringMap].fromBytes(ByteBuffer.wrap(bob))))
     }
   }
 
@@ -29,20 +30,22 @@ object DatabaseOperator {
     for {
       entries <- insert.grouped(100)
     } {
-      val i = entries.map { case DbEntry((name, substrings)) => (name, Pickle.intoBytes(substrings).array()) }
-      val q = DBIO.seq(table.map(t => (t.name, t.bob)) ++= i)
+      val i = entries.map { case DbEntry((name, seq, substrings)) => (name, seq, Pickle.intoBytes(substrings).array()) }
+      val q = DBIO.seq(table.map(t => (t.name, t.sequence, t.bob)) ++= i)
       db.run(q).await()
       size += i.size
       println(s"Loaded: $size")
     }
   }
 
-  private class DnaTable(tag: Tag) extends Table[(Long, String, Array[Byte])](tag, dnaTableName) {
-    def * = (id, name, bob)
+  private class DnaTable(tag: Tag) extends Table[(Long, String, String, Array[Byte])](tag, dnaTableName) {
+    def * = (id, name, sequence, bob)
 
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def name = column[String]("name")
+
+    def sequence = column[String]("sequence")
 
     def bob = column[Array[Byte]]("bob")
   }

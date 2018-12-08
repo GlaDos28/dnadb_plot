@@ -29,7 +29,11 @@ object Application {
     var max: (String, Int) = ("", Int.MinValue)
     var max2: (String, Int) = ("", Int.MinValue)
 
-    DatabaseOperator.read().foreach { case (id, entry) =>
+    DatabaseOperator.init()
+    val converted = Converter.convert(OldDbReader.read(Utils.resourceURL("uniprot_sprot.fasta")))
+    DatabaseOperator.write(converted)
+
+//    DatabaseOperator.read().foreach { case (id, entry) =>
 //      val dotplot = DotPlot.apply(ssmm, entry.substrings, substrings)
 //      val seqPair = SeqPair(DotPlot.toString(entry.substrings), seq)
 
@@ -40,17 +44,16 @@ object Application {
 //      val strips        = Strip.scanlineDiagsFitStrip(stripMaxWidth)(bestOffsets)
 //      val stripAligns   = strips.map(_.smithWatermanScore(gapPenalty)(seqPair, weightMatrix))
 //      val alignRes      = AlignResult.fromStripAligns(stripAligns)
-
-      val comp = DotPlot.toString(entry.substrings)
-      val score = SmithWatermanRaw.sw(weightMatrix, comp, seq)
-      if (score > max._2) {
-        max = (entry.name, score)
-      } else if (score > max2._2) {
-        max2 = (entry.name, score)
-      }
-    }.await()
-
-    println(max)
-    println(max2)
+//
+//      val score = SmithWatermanRaw.sw(weightMatrix, entry.sequence, seq)
+//      if (score > max._2) {
+//        max = (entry.name, score)
+//      } else if (score > max2._2) {
+//        max2 = (entry.name, score)
+//      }
+//    }.await()
+//
+//    println(max)
+//    println(max2)
   }
 }

@@ -8,8 +8,6 @@ import scala.concurrent.{Await, Future}
 object Utils {
 
   def resourceURL(fileName: String): URL = {
-    println(fileName)
-    println(getClass.getClassLoader.getResource(fileName))
     getClass.getClassLoader.getResource(fileName)
   }
 

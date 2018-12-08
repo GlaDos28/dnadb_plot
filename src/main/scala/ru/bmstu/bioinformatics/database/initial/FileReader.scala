@@ -1,18 +1,19 @@
 package ru.bmstu.bioinformatics.database.initial
 
 import java.io.File
+import java.net.URL
 
 import scala.io.Source
 
 /** File reader for protein database */
 object FileReader {
 
-  def read(file: File): Iterator[DbEntry] = {
-    groupedIterator(file).map { case (name, content) => DbEntry((name, content)) }
+  def read(url: URL): Iterator[DbEntry] = {
+    groupedIterator(url).map { case (name, content) => DbEntry((name, content)) }
   }
 
-  private def groupedIterator(file: File): Iterator[(String, String)] = {
-    val baseIterator = Source.fromFile(file).getLines()
+  private def groupedIterator(url: URL): Iterator[(String, String)] = {
+    val baseIterator = Source.fromURL(url).getLines()
 
     new Iterator[(String, String)] {
       private var previousCaption: String = _
