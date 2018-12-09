@@ -4,7 +4,7 @@ import ru.bmstu.bioinformatics.algo.Preamble._
 import ru.bmstu.bioinformatics.algo.util.DotPlot.DotPlot
 
 /* Mutable */
-class DiagSum(val iLen: Int, val jLen: Int, k: Int, val data: collection.mutable.IndexedSeq[Int]) {
+class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[Int]) {
 
   def this(iLen: Int, jLen: Int, k: Int) = this(iLen, jLen, k, collection.mutable.IndexedSeq.fill(iLen + jLen - 2 * k + 1)(0))
 

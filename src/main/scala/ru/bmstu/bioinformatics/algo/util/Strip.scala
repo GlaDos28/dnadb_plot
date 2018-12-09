@@ -63,9 +63,9 @@ class Strip(diags: IndexedSeq[Diagonal]) {
     AlignResult(maxScore)
   }
 
-  def leftOffset: Int = diags.head
+  def leftOffset: Int = diags.head.offset
 
-  def rightOffset: Int = diags.last
+  def rightOffset: Int = diags.last.offset
 }
 
 object Strip {
@@ -79,13 +79,13 @@ object Strip {
     /* Util functions */
 
     val fillUntilPossible = () => {
-      while (follow < sortedDiags.size && sortedDiags(follow) - strip.head + 1 <= w) {
+      while (follow < sortedDiags.size && sortedDiags(follow).offset - strip.head.offset + 1 <= w) {
         strip :+= sortedDiags(follow)
         follow += 1
       }
     }
 
-    val removeUntilEnough = () => strip = strip.dropWhile(strip.last - _ + 1 > w)
+    val removeUntilEnough = () => strip = strip.dropWhile(strip.last.offset - _.offset + 1 > w)
 
     /* --- */
 

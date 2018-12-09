@@ -5,18 +5,22 @@ import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 case class SeqPair(s1: String, s2: String, pos: (Int, Int) = (0, 0), diag: Diagonal = Diagonal(0)) {
 
-  def getDiagonalSeqs(diag: Diagonal): SeqPair = diag.offset match {
-    case x if x > 0 => SeqPair(
-      s1.substring(x, x + math.min(s1.length - x, s2.length)),
-      s2.substring(0, math.min(s1.length - x, s2.length)),
-      (x, 0),
-      diag)
-    case x => SeqPair(
-      s1.substring(0, math.min(s2.length + x, s1.length)),
-      s2.substring(-x, -x + math.min(s2.length + x, s1.length)),
-      (0, -x),
-      diag)
-  }
+  def getDiagonalSeqs(diag: Diagonal): SeqPair =
+    if (diag.offset > 0) {
+      SeqPair(
+        s1.substring(diag.offset, diag.offset + math.min(s1.length - diag.offset, s2.length)),
+        s2.substring(0, math.min(s1.length - diag.offset, s2.length)),
+        (diag.offset, 0),
+        diag
+      )
+    } else {
+      SeqPair(
+        s1.substring(0, math.min(s2.length + diag.offset, s1.length)),
+        s2.substring(-diag.offset, -diag.offset + math.min(s2.length + diag.offset, s1.length)),
+        (0, -diag.offset),
+        diag
+      )
+    }
 
   def getScore(implicit scoreTable: KeyMatrix): Int = {
     var score = 0
