@@ -37,13 +37,14 @@ object DotPlot {
   /** Compute [[DotPlot]] by given substring maps */
   def apply(m: SubstringMatchMatrix, ssm1: SubstringMap, ssm2: SubstringMap): DotPlot = {
     val b = mutable.Map.empty[(Int, Int), Int]
-    val ks = ssm1.keySet.union(ssm2.keySet)
+    val ks = ssm1.keySet.intersect(ssm2.keySet)
     ks.foreach { ss =>
+      val score = m(ss)
       for {
         i1 <- ssm1(ss)
         i2 <- ssm2(ss)
       } {
-        b.update((i1, i2), m(ss))
+        b.update((i1, i2), score)
       }
     }
 
