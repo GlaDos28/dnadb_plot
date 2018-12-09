@@ -16,9 +16,10 @@ class DiagSum(val iLen: Int, val jLen: Int, k: Int, val data: collection.mutable
 
   def pickMax(amount: Int): List[Diagonal] = {
     data.indices
-      .sortWith(data(_) > data(_)).toList
+      .sortWith(data(_) > data(_))
       .take(math.min(amount, data.length))
       .map(i => Diagonal(i + minInd))
+      .toList
   }
 
   override def toString: String = {

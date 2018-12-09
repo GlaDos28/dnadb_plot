@@ -1,13 +1,12 @@
 package ru.bmstu.bioinformatics.algo.util
 
-import ru.bmstu.bioinformatics.algo.Preamble._
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 import scala.collection.mutable.ListBuffer
 
-class Strip(diags: List[Diagonal]) {
+class Strip(diags: IndexedSeq[Diagonal]) {
   def smithWatermanScore(gapPenalty: Int)
                         (seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
     val topBound    = rightOffset
@@ -91,7 +90,7 @@ object Strip {
     /* --- */
 
     fillUntilPossible()
-    resBuffer += new Strip(strip.toList)
+    resBuffer += new Strip(strip)
 
     while (follow < sortedDiags.size) {
       strip :+= sortedDiags(follow)
@@ -100,7 +99,7 @@ object Strip {
       removeUntilEnough()
       fillUntilPossible()
 
-      resBuffer += new Strip(strip.toList)
+      resBuffer += new Strip(strip)
     }
 
     resBuffer.toList

@@ -94,7 +94,7 @@ object Application {
         }
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
-        val strip              = new Strip(graphFilteredDiags.toList.map(_.diag).sortBy(-_.offset))
+        val strip              = new Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(-_.offset))
         val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {
