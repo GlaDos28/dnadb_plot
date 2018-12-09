@@ -23,10 +23,14 @@ object DatabaseOperator {
   }
 
   //indices are assumed to start from zero
-  def read(from: Long, to: Long): DatabasePublisher[(Long, DbEntry)] = {
-    db.stream(table.sortBy(_.id).drop(from).take(to - from - 1).result).mapResult {
-      case (id, name, seq, bob) => id -> DbEntry((name, seq, Unpickle.apply[SubstringMap].fromBytes(ByteBuffer.wrap(bob))))
-    }
+  def read(from: Long, to: Long): DatabasePublisher[DbEntry] = {
+    db.stream(
+      table.sortBy(_.id)
+        .map(t => (t.name, t.sequence, t.bob))
+        .drop(from)
+        .take(to - from - 1).result
+    )
+      .mapResult { tup => DbEntry((tup._1, tup._2, Unpickle.apply[SubstringMap].fromBytes(ByteBuffer.wrap(tup._3)))) }
   }
 
   def write(insert: Iterator[DbEntry]): Unit = {
@@ -40,6 +44,10 @@ object DatabaseOperator {
       size += i.size
       println(s"Loaded: $size")
     }
+  }
+
+  def close(): Unit = {
+    db.close()
   }
 
   private class DnaTable(tag: Tag) extends Table[(Long, String, String, Array[Byte])](tag, dnaTableName) {
