@@ -9,7 +9,7 @@ import scala.collection.mutable
   */
 object DotPlot {
 
-  type DotPlot = Map[(Int, Int), Int]
+  type DotPlot = mutable.Map[(Int, Int), Int]
   //Maps substrings to their positions in the sequence
   type SubstringMap = Map[String, Set[Int]]
 
@@ -28,13 +28,17 @@ object DotPlot {
   def apply(m: SubstringMatchMatrix, ssm1: SubstringMap, ssm2: SubstringMap): DotPlot = {
     val b = mutable.AnyRefMap.empty[(Int, Int), Int]
 
-    ssm1.keys.withFilter(ssm2.contains).foreach { ss =>
-      val score = m(ss)
-      ssm1(ss).foreach { i1 =>
-        ssm2(ss).foreach(i2 => b.update((i1, i2), score))
+    ssm1.foreach { kv =>
+      val ss = kv._1
+      val v = kv._2
+      if (ssm2.contains(ss)) {
+        val score = m(ss)
+        v.foreach { i1 =>
+          ssm2(ss).foreach(i2 => b.update((i1, i2), score))
+        }
       }
     }
 
-    b.toMap
+    b
   }
 }

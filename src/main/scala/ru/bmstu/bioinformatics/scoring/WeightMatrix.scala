@@ -74,11 +74,7 @@ object WeightMatrix {
         }
     }
 
-    val init = builder.filterKeys(t => t._2 >= t._1).toMap
-
-    init.withDefault {
-      case (k1, k2) if k2 < k1 => init(k2, k1)
-    }
+    builder.toMap
   }
 
   private def splitBySpaces(str: String) = str.split("\\s+")
