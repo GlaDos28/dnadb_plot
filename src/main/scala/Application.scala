@@ -8,6 +8,7 @@ import ru.bmstu.bioinformatics.Utils._
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.algo.util.DotPlot.SubstringMap
+import ru.bmstu.bioinformatics.algo.util.diagGraph.DiagGraph
 import ru.bmstu.bioinformatics.algo.util.{DiagSum, DotPlot, Strip}
 import ru.bmstu.bioinformatics.algo_legacy.SmithWatermanRaw
 import ru.bmstu.bioinformatics.database.converted.{Converter, DatabaseOperator}
@@ -97,7 +98,7 @@ object Application {
         val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {
-          println(id, alignRes.score, (System.currentTimeMillis() - timestart).asInstanceOf[Float] / 1000)
+          println(id, alignRes.score, (System.currentTimeMillis() - timestart).toFloat / 1000)
         }
       }
     }
