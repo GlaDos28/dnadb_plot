@@ -31,26 +31,27 @@ object Application {
 //    val converted = Converter.convert(OldDbReader.read(Utils.resourceURL("uniprot_sprot.fasta")))
 //    DatabaseOperator.write(converted)
 
+    val timestart = System.currentTimeMillis()
+
     DatabaseOperator.read().foreach { case (id, entry) =>
-      println(id)
       val dotplot = DotPlot.apply(ssmm, entry.substrings, substrings)
       val seqPair = SeqPair(entry.sequence, seq)
 
       val diagSum       = DiagSum.fromDotMatrix(dotplot, seqPair.s1.length, seqPair.s2.length, 2)
       val bestOffsets   = diagSum.pickMax(diagonalFilter)
-      val bestDiags     = bestOffsets.map(seqPair.getDiagonalSeqs)
-      //val bestTrimDiags = bestDiags.map(_.trimmedToMaxLocal(scoreTable))
+//      val bestDiags     = bestOffsets.map(seqPair.getDiagonalSeqs)
+//      val bestTrimDiags = bestDiags.map(_.trimmedToMaxLocal(scoreTable))
       val strips        = Strip.scanlineDiagsFitStrip(stripMaxWidth)(bestOffsets)
       val stripAligns   = strips.map(_.smithWatermanScore(gapPenalty)(seqPair, weightMatrix))
       val alignRes      = AlignResult.fromStripAligns(stripAligns)
 
-      val score = SmithWatermanRaw.sw(weightMatrix, entry.sequence, seq)
-      if (score > max._2) {
-        max = (entry.name, score)
-      } else if (score > max2._2) {
-        max2 = (entry.name, score)
+      if (id % 10000 == 0) {
+        println(id, alignRes.score)
       }
+
     }.await()
+
+    println("time", System.currentTimeMillis() - timestart)
 
     println(max)
     println(max2)
