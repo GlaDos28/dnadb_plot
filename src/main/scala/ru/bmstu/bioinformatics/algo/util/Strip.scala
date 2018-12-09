@@ -7,9 +7,9 @@ import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 import scala.collection.mutable.ListBuffer
 
-class Strip(val diags: List[Diagonal]) {
-  def smithWatermanScore(gapPenalty: Int, outTable: Boolean = false)
-                        (implicit seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
+class Strip(diags: List[Diagonal]) {
+  def smithWatermanScore(gapPenalty: Int)
+                        (seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
     val topBound    = rightOffset
     val bottomBound = leftOffset
     val maxWidth    = leftOffset - rightOffset
@@ -21,11 +21,7 @@ class Strip(val diags: List[Diagonal]) {
     var curLastColInd  = math.max(-topBound,    0)
 
     var maxScore = 0
-
     var maxScoreLen = 0
-    val debugTable = if (outTable)
-      Some(collection.mutable.IndexedSeq.fill(seqPair.s1.length, seqPair.s2.length)((0, false))) else
-      None
 
     /* First row elements */
 
@@ -52,11 +48,6 @@ class Strip(val diags: List[Diagonal]) {
           maxScore = math.max(score, maxScore)
         }
 
-        if (outTable) {
-          maxScoreLen = math.max(score.toString.length, maxScoreLen)
-          debugTable.get(i)(j) = (score, true)
-        }
-
         newRowScore(j - curFirstColInd + 1) = score
       }
 
@@ -70,15 +61,7 @@ class Strip(val diags: List[Diagonal]) {
       curLastColInd  = math.min(math.max(-topBound + cnt, 0), seqPair.s2.length - 1)
     }
 
-    val resTableStr = if (outTable)
-      Some(("" /: debugTable.get) (_ + _.mkTabbedString(
-        maxScoreLen,
-        " ",
-        el => if (el._2) el._1.toString.colorify(ColorGreen) else el._1.toString,
-        _._1.toString) + '\n')) else
-      None
-
-    AlignResult(maxScore, resTableStr)
+    AlignResult(maxScore)
   }
 
   def leftOffset: Int = diags.head
