@@ -10,7 +10,7 @@ import scala.io.Source
 /** Represents symmetrical weight matrix */
 object WeightMatrix {
 
-  type KeyMatrix = Map[(Char, Char), Int]
+  type KeyMatrix = Map[Char, Map[Char, Int]]
 
   def readDefault: KeyMatrix = fromResource("protein.mtx")
 
@@ -27,7 +27,7 @@ object WeightMatrix {
     * @return symmetrical weight matrix of keys
     */
   def fromURL(fileInput: URL): KeyMatrix = {
-    val builder = mutable.HashMap[(Char, Char), Int]()
+    val builder = mutable.AnyRefMap[(Char, Char), Int]()
     val names :: body = Source.fromURL(fileInput)
       .getLines()
       .map(_.trim)
@@ -74,7 +74,12 @@ object WeightMatrix {
         }
     }
 
-    builder.toMap
+    builder
+      .toMap
+      .groupBy { case ((c1, _), _) => c1 }
+      .map { case (c1, seq) =>
+        c1 -> seq.map { case ((_, c2), s) => c2 -> s }
+      }
   }
 
   private def splitBySpaces(str: String) = str.split("\\s+")

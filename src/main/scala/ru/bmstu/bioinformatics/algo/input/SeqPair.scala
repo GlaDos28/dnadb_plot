@@ -3,6 +3,8 @@ package ru.bmstu.bioinformatics.algo.input
 import ru.bmstu.bioinformatics.algo.util.Diagonal
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
+import scala.collection.mutable.ListBuffer
+
 case class SeqPair(s1: String, s2: String, pos: (Int, Int) = (0, 0), diag: Diagonal = Diagonal(0)) {
 
   def getDiagonalSeqs(diag: Diagonal): SeqPair =
@@ -22,30 +24,28 @@ case class SeqPair(s1: String, s2: String, pos: (Int, Int) = (0, 0), diag: Diago
       )
     }
 
-  def getScore(implicit scoreTable: KeyMatrix): Int = {
+  def getScore(scoreTable: KeyMatrix): Int = {
     var score = 0
 
     for (i <- 0 until minLen) {
-      score += scoreTable((s1(i), s2(i)))
+      score += scoreTable(s1(i))(s2(i))
     }
 
     score
   }
 
-  def trimmedToMaxLocal(implicit scoreTable: KeyMatrix): SeqPair = {
+  def trimmedToMaxLocal(scoreTable: KeyMatrix): SeqPair = {
     var prevScore = 0
-    var firstInds = 0 :: Nil
+    val firstInds = ListBuffer(0)
     var lastInd   = 0
     var maxScore  = 0
 
     for (i <- 0 until minLen) {
-      val score = math.max(prevScore + scoreTable((s1(i), s2(i))), 0)
+      val score = math.max(prevScore + scoreTable(s1(i))(s2(i)), 0)
 
       if (score == 0) {
-        firstInds ::= i + 1
-      }
-
-      if (score > maxScore) {
+        firstInds prepend (i + 1)
+      } else if (score > maxScore) {
         maxScore = score
         lastInd = i
       }

@@ -18,7 +18,7 @@ object SmithWatermanRaw {
       val left    = if (j == 0) 0 else m(i)(j - 1)
       val top     = if (i == 0) 0 else m(i - 1)(j)
       val topLeft = if (i == 0 || j == 0) 0 else m(i - 1)(j - 1)
-      val score = math.max(math.max(left + gapPenalty, top + gapPenalty), topLeft + scoreTable((s1(i), s2(j))))
+      val score = math.max(math.max(left + gapPenalty, top + gapPenalty), topLeft + scoreTable(s1(i))(s2(j)))
 
       m(i)(j) = score
 

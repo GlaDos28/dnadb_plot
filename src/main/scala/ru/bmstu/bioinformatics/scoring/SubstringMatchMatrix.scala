@@ -8,7 +8,7 @@ object SubstringMatchMatrix {
   type SubstringMatchMatrix = Map[String, Int]
 
   def apply(m: KeyMatrix, size: Int = 2): SubstringMatchMatrix = {
-    val chars = m.keys.map(_._1)
+    val chars = m.keys
     apply(m, allStrings(chars, size - 1, chars.map(_.toString)))
   }
 
@@ -36,7 +36,7 @@ object SubstringMatchMatrix {
 
   private def computeScore(m: KeyMatrix, s1: String, s2: String): Int = {
     s1.zip(s2).foldLeft(0) {
-      case (acc, (c1, c2)) => acc + m((c1, c2))
+      case (acc, (c1, c2)) => acc + m(c1)(c2)
     }
   }
 }

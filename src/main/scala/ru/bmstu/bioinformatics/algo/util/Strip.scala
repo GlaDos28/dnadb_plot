@@ -31,7 +31,7 @@ case class Strip(diags: IndexedSeq[Diagonal]) extends AnyVal {
       newRowScore(0) = -1000000 /* To prevent using non-strip elements */
 
       for (j <- curFirstColInd to curLastColInd) {
-        val stScore      = scoreTable((seqPair.s1(i), seqPair.s2(j)))
+        val stScore      = scoreTable(seqPair.s1(i))(seqPair.s2(j))
         val leftScore    = newRowScore.last
         val topScore     = rowScore(j - curFirstColInd + 2)
         val topLeftScore = rowScore(j - curFirstColInd + 1)

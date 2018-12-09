@@ -3,19 +3,21 @@ package ru.bmstu.bioinformatics.algo.util.diagGraph
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
-class DiagGraph(var nodes: List[GraphNode] = Nil) {
+import scala.collection.mutable.ListBuffer
+
+class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
     var curSize: Int = 0
 
     def addNode(seqPairRef: SeqPair, pos: (Int, Int)): GraphNode = {
         val node = new GraphNode(curSize, seqPairRef, pos)
-        nodes ::= node
+        nodes prepend node
         curSize += 1
         node
     }
 
     def addEdge(in: GraphNode, outInd: Int, weight: Int, diagRef: Option[SeqPair] = None): GraphEdge = {
         val edge = new GraphEdge(outInd, weight, diagRef)
-        in.outEdges ::= edge
+        in.outEdges prepend edge
         edge
     }
 
@@ -61,14 +63,14 @@ class DiagGraph(var nodes: List[GraphNode] = Nil) {
 }
 
 object DiagGraph {
-    def fromDiags(diags: List[SeqPair], gapPenalty: Int)(implicit scoreTable: KeyMatrix): DiagGraph = {
+    def fromDiags(diags: List[SeqPair], gapPenalty: Int)(scoreTable: KeyMatrix): DiagGraph = {
         val graph   = new DiagGraph()
         val nodeMap = diags.zip(diags
             .map(d => graph.addNode(d, d.pos)).zip(diags
             .map(d => graph.addNode(d, (d.pos._1 + d.minLen, d.pos._2 + d.minLen))))).toMap
 
         for ((seqPair, nodePair) <- nodeMap) {
-            graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore, Some(seqPair))
+            graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore(scoreTable), Some(seqPair))
 
             for (otherNodePair <- nodeMap.values) {
                 (   (nodePair._1, otherNodePair._1) ::
