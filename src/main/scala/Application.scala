@@ -6,8 +6,6 @@ import monix.execution.Scheduler
 import ru.bmstu.bioinformatics.Utils
 import ru.bmstu.bioinformatics.Utils._
 import ru.bmstu.bioinformatics.algo.input.SeqPair
-import ru.bmstu.bioinformatics.algo.output.AlignResult
-import ru.bmstu.bioinformatics.algo.util.DotPlot.SubstringMap
 import ru.bmstu.bioinformatics.algo.util.{DiagSum, DotPlot, Strip}
 import ru.bmstu.bioinformatics.algo_legacy.SmithWatermanRaw
 import ru.bmstu.bioinformatics.database.converted.{Converter, DatabaseOperator}
@@ -20,9 +18,9 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 object Application {
 
-  val gapPenalty: Int = -2 //штраф за гэп
-  val diagonalFilter: Int = 10 //число отбираемых диагоналей
-  val stripMaxWidth: Int = 7 //максимальная ширина полосы
+  val gapPenalty:     Int = -2 // Штраф за гэп
+  val diagonalFilter: Int = 10 // Число отбираемых диагоналей
+  val cutoffScore:    Int = 28 // Минимальный score диагонали
 
   def main(args: Array[String]): Unit = {
     val weightMatrix = WeightMatrix.readDefault
@@ -42,6 +40,30 @@ object Application {
 
     implicit val ec: Scheduler = Scheduler(Executors.newFixedThreadPool(parFactor))
 
+    
+    
+    
+    val diagSum            = DiagSum.fromDotMatrix(dotplot, seqPair.s1.length, seqPair.s2.length, 2)
+    val bestOffsets        = diagSum.pickMax(diagonalFilter)
+    val bestDiags          = bestOffsets.map(seqPair.getDiagonalSeqs)
+    val bestTrimDiags      = bestDiags.map(_.trimmedToMaxLocal(weightMatrix))
+    var cutDiags           = bestTrimDiags.filter(_.getScore(weightMatrix) >= cutoffScore)
+
+    if (cutDiags.isEmpty) {
+      cutDiags = bestTrimDiags.maxBy(_.getScore(weightMatrix)) :: Nil
+    }
+
+    val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
+    val strip              = new Strip(graphFilteredDiags.toList.map(_.diag).sortBy(-_.offset))
+    val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
+
+    if (id % 10000 == 0) {
+      println(id, alignRes.score, (System.currentTimeMillis() - timestart).asInstanceOf[Float] / 1000)
+    } 
+    
+    
+    
+    
     val recordsCount = DatabaseOperator.count()
     val chunk = recordsCount / parFactor
     val timestart = System.currentTimeMillis()
@@ -52,7 +74,7 @@ object Application {
 
     res.runSyncUnsafe()
 
-    println("time", System.currentTimeMillis() - timestart)
+    println("Total time:", System.currentTimeMillis() - timestart)
 
     println(max)
     println(max2)

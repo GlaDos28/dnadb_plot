@@ -15,11 +15,10 @@ class DiagSum(val iLen: Int, val jLen: Int, k: Int, val data: collection.mutable
   def inc(offset: Int): Unit = data(offset - minInd) += 1
 
   def pickMax(amount: Int): List[Diagonal] = {
-    data.zipWithIndex
-      .sortWith(_._1 > _._1)
+    data.indices
+      .sortWith(data(_) > data(_)).toList
       .take(math.min(amount, data.length))
-      .map(p => Diagonal(p._2 + minInd))
-      .toList
+      .map(i => Diagonal(i + minInd))
   }
 
   override def toString: String = {

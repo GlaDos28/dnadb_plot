@@ -7,16 +7,18 @@ import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 import scala.collection.mutable.ListBuffer
 
-class Strip private(val diags: List[Diagonal]) {
+class Strip(val diags: List[Diagonal]) {
   def smithWatermanScore(gapPenalty: Int, outTable: Boolean = false)
                         (implicit seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
-    val topBound = leftOffset
-    val bottomBound = rightOffset
+    val topBound    = rightOffset
+    val bottomBound = leftOffset
+    val maxWidth    = leftOffset - rightOffset
 
     var cnt = 0
     var i = math.max(topBound, 0)
+
     var curFirstColInd = math.max(-bottomBound, 0)
-    var curLastColInd = math.max(-topBound, 0)
+    var curLastColInd  = math.max(-topBound,    0)
 
     var maxScore = 0
 
@@ -27,23 +29,23 @@ class Strip private(val diags: List[Diagonal]) {
 
     /* First row elements */
 
-    var rowScore = ListBuffer.fill(curLastColInd - curFirstColInd + 3)(0)
+    var rowScore    = Array.fill(maxWidth + 4)(0)
+    val newRowScore = Array.fill(maxWidth + 4)(0)
 
     /* --- */
 
     while (i < seqPair.s1.length && curFirstColInd < seqPair.s2.length) {
-      var newRowScore = ListBuffer[Int]()
-      newRowScore += -1000000 /* To prevent using non-strip elements */
+      newRowScore(0) = -1000000 /* To prevent using non-strip elements */
 
       for (j <- curFirstColInd to curLastColInd) {
-        val stScore = scoreTable((seqPair.s1(i), seqPair.s2(j)))
-        val leftScore = newRowScore.last
-        val topScore = rowScore(j - curFirstColInd + 2)
+        val stScore      = scoreTable((seqPair.s1(i), seqPair.s2(j)))
+        val leftScore    = newRowScore.last
+        val topScore     = rowScore(j - curFirstColInd + 2)
         val topLeftScore = rowScore(j - curFirstColInd + 1)
 
         val score = math.max(math.max(
-          leftScore + gapPenalty,
-          topScore + gapPenalty),
+          leftScore    + gapPenalty,
+          topScore     + gapPenalty),
           topLeftScore + stScore)
 
         if (i == seqPair.s1.length - 1 || j == seqPair.s2.length - 1) {
@@ -55,17 +57,17 @@ class Strip private(val diags: List[Diagonal]) {
           debugTable.get(i)(j) = (score, true)
         }
 
-        newRowScore += score
+        newRowScore(j - curFirstColInd + 1) = score
       }
 
-      newRowScore += -1000000 /* To prevent using non-strip elements */
-      newRowScore += -1000000
+      newRowScore(curLastColInd - curFirstColInd + 2) = -1000000 /* To prevent using non-strip elements */
+      newRowScore(curLastColInd - curFirstColInd + 3) = -1000000
       rowScore = newRowScore
 
       cnt += 1
-      i += 1
+      i   += 1
       curFirstColInd = math.max(-bottomBound + cnt, 0)
-      curLastColInd = math.min(math.max(-topBound + cnt, 0), seqPair.s2.length - 1)
+      curLastColInd  = math.min(math.max(-topBound + cnt, 0), seqPair.s2.length - 1)
     }
 
     val resTableStr = if (outTable)
