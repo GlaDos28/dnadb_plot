@@ -9,7 +9,7 @@ import scala.collection.mutable
   */
 object DotPlot {
 
-  type DotPlot = Map[(Int, Int), Int]
+  type DotPlot = mutable.Map[(Int, Int), Int]
   //Maps substrings to their positions in the sequence
   type SubstringMap = Map[String, Set[Int]]
 
@@ -39,6 +39,6 @@ object DotPlot {
       }
     }
 
-    b.toMap
+    b
   }
 }
