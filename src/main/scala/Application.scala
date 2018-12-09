@@ -70,7 +70,7 @@ object Application {
                        (implicit ec: ExecutionContext): Task[Unit] = {
 
     Task.deferFuture {
-      DatabaseOperator.read(from, to).foreach { entry =>
+      DatabaseOperator.read(from, to).foreach { case (id, entry) =>
         val dotplot = DotPlot.apply(substringMatchMatrix, entry.substrings, substrings)
         val seqPair = SeqPair(entry.sequence, seq)
 
@@ -79,6 +79,10 @@ object Application {
         val strips        = Strip.scanlineDiagsFitStrip(stripMaxWidth)(bestOffsets)
         val stripAligns   = strips.map(_.smithWatermanScore(gapPenalty)(seqPair, weightMatrix))
         val alignRes      = AlignResult.fromStripAligns(stripAligns)
+
+        if (id % 10000 == 0) {
+          println(id)
+        }
       }
     }
   }
