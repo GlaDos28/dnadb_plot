@@ -1,12 +1,20 @@
+
+import java.util.concurrent.Executors
+
+import ru.bmstu.bioinformatics.Utils
 import ru.bmstu.bioinformatics.Utils._
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
+import ru.bmstu.bioinformatics.algo.util.DotPlot.SubstringMap
 import ru.bmstu.bioinformatics.algo.util.{DiagSum, DotPlot, Strip}
 import ru.bmstu.bioinformatics.algo_legacy.SmithWatermanRaw
-import ru.bmstu.bioinformatics.database.converted.DatabaseOperator
+import ru.bmstu.bioinformatics.database.converted.{Converter, DatabaseOperator}
+import ru.bmstu.bioinformatics.database.initial.{FileReader => OldDbReader}
+import ru.bmstu.bioinformatics.scoring.SubstringMatchMatrix.SubstringMatchMatrix
+import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 import ru.bmstu.bioinformatics.scoring.{SubstringMatchMatrix, WeightMatrix}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 //    DatabaseOperator.init()
 //    val converted = Converter.convert(OldDbReader.read(Utils.resourceFile("uniprot_sprot.fasta")))
@@ -31,16 +39,40 @@ object Application {
 //    val converted = Converter.convert(OldDbReader.read(Utils.resourceURL("uniprot_sprot.fasta")))
 //    DatabaseOperator.write(converted)
 
+    val parFactor = 8
+
+    implicit val ec: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(parFactor))
+
+    val recordsCount = DatabaseOperator.count()
+    val chunk = recordsCount / parFactor
     val timestart = System.currentTimeMillis()
 
-    DatabaseOperator.read().foreach { case (id, entry) =>
+    val res = Future.traverse ((0 until parFactor).toList) { i =>
+      processDb(seq, weightMatrix, substrings, ssmm, i * chunk, (i + 1) * chunk)
+    }
+
+    res.await()
+
+    println("time", System.currentTimeMillis() - timestart)
+
+    println(max)
+    println(max2)
+  }
+
+  private def processDb(seq: String,
+                        weightMatrix: KeyMatrix,
+                        substrings: SubstringMap,
+                        ssmm: SubstringMatchMatrix,
+                        from: Int,
+                        to: Int)
+                       (implicit ec: ExecutionContext): Future[Unit] = {
+
+    DatabaseOperator.read(from, to).foreach { case (id, entry) =>
       val dotplot = DotPlot.apply(ssmm, entry.substrings, substrings)
       val seqPair = SeqPair(entry.sequence, seq)
 
       val diagSum       = DiagSum.fromDotMatrix(dotplot, seqPair.s1.length, seqPair.s2.length, 2)
       val bestOffsets   = diagSum.pickMax(diagonalFilter)
-//      val bestDiags     = bestOffsets.map(seqPair.getDiagonalSeqs)
-//      val bestTrimDiags = bestDiags.map(_.trimmedToMaxLocal(scoreTable))
       val strips        = Strip.scanlineDiagsFitStrip(stripMaxWidth)(bestOffsets)
       val stripAligns   = strips.map(_.smithWatermanScore(gapPenalty)(seqPair, weightMatrix))
       val alignRes      = AlignResult.fromStripAligns(stripAligns)
@@ -48,12 +80,6 @@ object Application {
       if (id % 10000 == 0) {
         println(id, alignRes.score)
       }
-
-    }.await()
-
-    println("time", System.currentTimeMillis() - timestart)
-
-    println(max)
-    println(max2)
+    }
   }
 }

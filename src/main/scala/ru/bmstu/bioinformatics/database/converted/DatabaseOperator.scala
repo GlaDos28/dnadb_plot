@@ -18,9 +18,13 @@ object DatabaseOperator {
     db.run(DBIO.seq(table.schema.create)).await()
   }
 
-  def read(): DatabasePublisher[(Long, DbEntry)] = {
-    val q = for (dna <- table) yield (dna.id, dna.name, dna.sequence, dna.bob)
-    db.stream(q.result).mapResult {
+  def count(): Int = {
+    db.run(table.length.result).await()
+  }
+
+  //indices are assumed to start from zero
+  def read(from: Long, to: Long): DatabasePublisher[(Long, DbEntry)] = {
+    db.stream(table.sortBy(_.id).drop(from).take(to - from - 1).result).mapResult {
       case (id, name, seq, bob) => id -> DbEntry((name, seq, Unpickle.apply[SubstringMap].fromBytes(ByteBuffer.wrap(bob))))
     }
   }
