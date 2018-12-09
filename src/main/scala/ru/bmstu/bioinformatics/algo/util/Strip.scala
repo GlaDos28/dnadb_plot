@@ -4,11 +4,10 @@ import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
-import scala.collection.mutable.ListBuffer
-
-class Strip(diags: IndexedSeq[Diagonal]) {
+case class Strip(diags: IndexedSeq[Diagonal]) extends AnyVal {
   def smithWatermanScore(gapPenalty: Int)
                         (seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
+
     val topBound    = rightOffset
     val bottomBound = leftOffset
     val maxWidth    = leftOffset - rightOffset
@@ -20,7 +19,6 @@ class Strip(diags: IndexedSeq[Diagonal]) {
     var curLastColInd  = math.max(-topBound,    0)
 
     var maxScore = 0
-    var maxScoreLen = 0
 
     /* First row elements */
 
@@ -38,10 +36,10 @@ class Strip(diags: IndexedSeq[Diagonal]) {
         val topScore     = rowScore(j - curFirstColInd + 2)
         val topLeftScore = rowScore(j - curFirstColInd + 1)
 
-        val score = math.max(math.max(
-          leftScore    + gapPenalty,
-          topScore     + gapPenalty),
-          topLeftScore + stScore)
+        val score = math.max(
+          math.max(leftScore + gapPenalty, topScore + gapPenalty),
+          topLeftScore + stScore
+        )
 
         if (i == seqPair.s1.length - 1 || j == seqPair.s2.length - 1) {
           maxScore = math.max(score, maxScore)
@@ -56,6 +54,7 @@ class Strip(diags: IndexedSeq[Diagonal]) {
 
       cnt += 1
       i   += 1
+
       curFirstColInd = math.max(-bottomBound + cnt, 0)
       curLastColInd  = math.min(math.max(-topBound + cnt, 0), seqPair.s2.length - 1)
     }
@@ -65,43 +64,5 @@ class Strip(diags: IndexedSeq[Diagonal]) {
 
   def leftOffset: Int = diags.head.offset
 
-  def rightOffset: Int = diags.last.offset
-}
-
-object Strip {
-  def scanlineDiagsFitStrip(w: Int)(diags: List[Diagonal]): List[Strip] = {
-    val sortedDiags = diags.sortWith(_.offset < _.offset)
-    val resBuffer = ListBuffer[Strip]()
-
-    var strip = Vector[Diagonal](sortedDiags.head)
-    var follow = 1
-
-    /* Util functions */
-
-    val fillUntilPossible = () => {
-      while (follow < sortedDiags.size && sortedDiags(follow).offset - strip.head.offset + 1 <= w) {
-        strip :+= sortedDiags(follow)
-        follow += 1
-      }
-    }
-
-    val removeUntilEnough = () => strip = strip.dropWhile(strip.last.offset - _.offset + 1 > w)
-
-    /* --- */
-
-    fillUntilPossible()
-    resBuffer += new Strip(strip)
-
-    while (follow < sortedDiags.size) {
-      strip :+= sortedDiags(follow)
-      follow += 1
-
-      removeUntilEnough()
-      fillUntilPossible()
-
-      resBuffer += new Strip(strip)
-    }
-
-    resBuffer.toList
-  }
+  def rightOffset: Int = diags(diags.length - 1).offset
 }
