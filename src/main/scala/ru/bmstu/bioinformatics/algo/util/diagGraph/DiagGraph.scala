@@ -63,7 +63,7 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
 }
 
 object DiagGraph {
-    def fromDiags(diags: List[SeqPair], gapPenalty: Int)(scoreTable: KeyMatrix): DiagGraph = {
+    def fromDiags(diags: Vector[SeqPair], gapPenalty: Int)(scoreTable: KeyMatrix): DiagGraph = {
       val graph   = new DiagGraph()
 
       val nodeMap = diags.map { d =>

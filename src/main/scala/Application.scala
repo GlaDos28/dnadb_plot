@@ -75,14 +75,12 @@ object Application {
       DatabaseOperator.read(from, to).foreach { case (id, entry) =>
         val seqPair = SeqPair(entry.sequence, seq)
 
-        val diagSum            = DiagSum.fromSubstringMaps(entry.substrings, substrings, seqPair.s1.length, seqPair.s2.length, 2)
-        val bestOffsets        = diagSum.pickMax(diagonalFilter)
-        val bestDiags          = bestOffsets.map(seqPair.getDiagonalSeqs)
-        val bestTrimDiags      = bestDiags.map(_.trimmedToMaxLocal(weightMatrix))
-        var cutDiags           = bestTrimDiags.filter(_.getScore(weightMatrix) >= cutoffScore)
+        val diagSum = DiagSum.fromSubstringMaps(entry.substrings, substrings, seqPair.s1.length, seqPair.s2.length, 2)
+        val bestTrimDiags = diagSum.bestTrim(diagonalFilter, seqPair, weightMatrix)
+        var cutDiags = bestTrimDiags.filter(_.getScore(weightMatrix) >= cutoffScore).toVector
 
         if (cutDiags.isEmpty) {
-          cutDiags = bestTrimDiags.maxBy(_.getScore(weightMatrix)) :: Nil
+          cutDiags = Vector(bestTrimDiags.maxBy(_.getScore(weightMatrix)))
         }
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags

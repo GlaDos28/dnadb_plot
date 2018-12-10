@@ -1,7 +1,9 @@
 package ru.bmstu.bioinformatics.algo.util
 
 import ru.bmstu.bioinformatics.algo.Preamble._
+import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.util.DotPlot.{DotPlot, SubstringMap}
+import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 /* Mutable */
 class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[Int]) {
@@ -21,6 +23,13 @@ class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[
       .take(math.min(amount, data.length))
       .map(i => Diagonal(i + minInd))
       .toList
+  }
+
+  def bestTrim(amount: Int, seqPair: SeqPair, weightMatrix: KeyMatrix): IndexedSeq[SeqPair] = {
+    data.indices
+      .sortWith(data(_) > data(_))
+      .take(math.min(amount, data.length))
+      .map(i => seqPair.getDiagonalSeqs(Diagonal(i + minInd)).trimmedToMaxLocal(weightMatrix))
   }
 
   override def toString: String = {
