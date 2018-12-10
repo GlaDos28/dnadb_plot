@@ -17,8 +17,8 @@ import scala.concurrent.ExecutionContext
 object Application {
 
   val gapPenalty:     Int     = -2   // Штраф за гэп
-  val diagonalFilter: Int     = 10   // Число отбираемых диагоналей
-  val cutoffScore:    Int     = 28   // Минимальный score диагонали
+  val diagonalFilter: Int     = 7   // Число отбираемых диагоналей
+  val cutoffScore:    Int     = 500   // Минимальный score диагонали
   val putAlign:       Boolean = true // Печатать ли выравнивание
 
   def main(args: Array[String]): Unit = {
