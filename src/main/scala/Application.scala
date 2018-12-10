@@ -22,8 +22,8 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 object Application {
 
   val gapPenalty:     Int = -2 // Штраф за гэп
-  val diagonalFilter: Int = 10 // Число отбираемых диагоналей
-  val cutoffScore:    Int = 28 // Минимальный score диагонали
+  val diagonalFilter: Int = 7 // Число отбираемых диагоналей
+  val cutoffScore:    Int = 500 // Минимальный score диагонали
 
   def main(args: Array[String]): Unit = {
     //todo save bin?
@@ -85,7 +85,7 @@ object Application {
         }
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
-        val strip              = new Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
+        val strip              = Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
         val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {
