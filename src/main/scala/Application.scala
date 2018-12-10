@@ -28,7 +28,6 @@ object Application {
   def main(args: Array[String]): Unit = {
     //todo save bin?
     val weightMatrix = WeightMatrix.readDefault
-    val ssmm = SubstringMatchMatrix(WeightMatrix.readDefault)
 
     val seq = "MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH"
 
@@ -51,7 +50,6 @@ object Application {
         seq = seq,
         weightMatrix = weightMatrix,
         substrings = substrings,
-        substringMatchMatrix = ssmm,
         from = i * chunk,
         to = (i + 1) * chunk,
         timestart = timestart)
@@ -68,7 +66,6 @@ object Application {
   private def processDb(seq: String,
                         weightMatrix: KeyMatrix,
                         substrings: SubstringMap,
-                        substringMatchMatrix: SubstringMatchMatrix,
                         from: Int,
                         to: Int,
                         timestart: Long)
@@ -76,10 +73,9 @@ object Application {
 
     Task.deferFuture {
       DatabaseOperator.read(from, to).foreach { case (id, entry) =>
-        val dotplot = DotPlot.apply(substringMatchMatrix, entry.substrings, substrings)
         val seqPair = SeqPair(entry.sequence, seq)
 
-        val diagSum            = DiagSum.fromDotMatrix(dotplot, seqPair.s1.length, seqPair.s2.length, 2)
+        val diagSum            = DiagSum.fromSubstringMaps(entry.substrings, substrings, seqPair.s1.length, seqPair.s2.length, 2)
         val bestOffsets        = diagSum.pickMax(diagonalFilter)
         val bestDiags          = bestOffsets.map(seqPair.getDiagonalSeqs)
         val bestTrimDiags      = bestDiags.map(_.trimmedToMaxLocal(weightMatrix))

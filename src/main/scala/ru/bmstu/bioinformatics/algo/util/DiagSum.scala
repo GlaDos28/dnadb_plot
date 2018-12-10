@@ -1,7 +1,7 @@
 package ru.bmstu.bioinformatics.algo.util
 
 import ru.bmstu.bioinformatics.algo.Preamble._
-import ru.bmstu.bioinformatics.algo.util.DotPlot.DotPlot
+import ru.bmstu.bioinformatics.algo.util.DotPlot.{DotPlot, SubstringMap}
 
 /* Mutable */
 class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[Int]) {
@@ -42,6 +42,22 @@ object DiagSum {
       val i = tup._1._1
       val j = tup._1._2
       diagSum.inc(i - j)
+    }
+
+    diagSum
+  }
+
+  def fromSubstringMaps(ssm1: SubstringMap, ssm2: SubstringMap, rowNum: Int, colNum: Int, k: Int): DiagSum = {
+    val diagSum = new DiagSum(rowNum, colNum, k)
+
+    ssm1.foreach { kv =>
+      val ss = kv._1
+      val v = kv._2
+      if (ssm2.contains(ss)) {
+        v.foreach { i1 =>
+          ssm2(ss).foreach(i2 =>  diagSum.inc(i1 - i2))
+        }
+      }
     }
 
     diagSum
