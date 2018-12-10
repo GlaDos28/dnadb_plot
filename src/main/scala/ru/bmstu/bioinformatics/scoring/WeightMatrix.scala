@@ -4,13 +4,14 @@ import java.net.URL
 
 import ru.bmstu.bioinformatics.Utils
 
+import scala.collection.immutable.IntMap
 import scala.collection.mutable
 import scala.io.Source
 
 /** Represents symmetrical weight matrix */
 object WeightMatrix {
 
-  type KeyMatrix = Map[Char, Map[Char, Int]]
+  type KeyMatrix = IntMap[IntMap[Int]]
 
   def readDefault: KeyMatrix = fromResource("protein.mtx")
 
@@ -74,12 +75,14 @@ object WeightMatrix {
         }
     }
 
-    builder
+    val res = builder
       .toMap
       .groupBy { case ((c1, _), _) => c1 }
       .map { case (c1, seq) =>
-        c1 -> seq.map { case ((_, c2), s) => c2 -> s }
+        c1.toInt -> seq.map { case ((_, c2), s) => c2.toInt -> s }
       }
+
+    IntMap.apply(res.map { case (c1, m) => c1 -> IntMap.apply[Int](m.toSeq:_*) }.toSeq:_*)
   }
 
   private def splitBySpaces(str: String) = str.split("\\s+")

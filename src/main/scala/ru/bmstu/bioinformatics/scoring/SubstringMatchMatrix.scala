@@ -8,7 +8,7 @@ object SubstringMatchMatrix {
   type SubstringMatchMatrix = Map[String, Int]
 
   def apply(m: KeyMatrix, size: Int = 2): SubstringMatchMatrix = {
-    val chars = m.keys
+    val chars = m.keys.map(_.toChar)
     apply(m, allStrings(chars, size - 1, chars.map(_.toString)))
   }
 

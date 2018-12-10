@@ -39,7 +39,7 @@ object Application {
 //    val converted = Converter.convert(OldDbReader.read(Utils.resourceURL("uniprot_sprot.fasta")))
 //    DatabaseOperator.write(converted)
 
-    val parFactor = 16
+    val parFactor = 8
 
     implicit val ec: Scheduler = Scheduler(Executors.newFixedThreadPool(parFactor))
 
