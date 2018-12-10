@@ -65,13 +65,12 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
 object DiagGraph {
     def fromDiags(diags: List[SeqPair], gapPenalty: Int)(scoreTable: KeyMatrix): DiagGraph = {
       val graph   = new DiagGraph()
-      val nodeMap = diags.zip(
-        diags
-          .map(d => graph.addNode(d, d.pos))
-          .zip(diags
-            .map(d => graph.addNode(d, (d.pos._1 + d.minLen, d.pos._2 + d.minLen)))
-          )
-      ).toMap
+
+      val nodeMap = diags.map { d =>
+        val p1 = graph.addNode(d, d.pos)
+        val p2 = graph.addNode(d, (d.pos._1 + d.minLen, d.pos._2 + d.minLen))
+        d -> (p1, p2)
+      }
 
       nodeMap.foreach { tup =>
         val seqPair = tup._1
@@ -79,7 +78,7 @@ object DiagGraph {
 
         graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore(scoreTable), Some(seqPair))
 
-        nodeMap.valuesIterator.foreach { otherNodePair =>
+        nodeMap.iterator.map(_._2).foreach { otherNodePair =>
           List(
             (nodePair._1, otherNodePair._1),
             (nodePair._1, otherNodePair._2),
