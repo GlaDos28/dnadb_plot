@@ -80,7 +80,7 @@ object DiagGraph {
       }
 
       nodeMap.foreach { tup =>
-        val seqPair = tup._1
+        val seqPair  = tup._1
         val nodePair = tup._2
 
         graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore(scoreTable), Some(seqPair))
@@ -93,11 +93,13 @@ object DiagGraph {
             (nodePair._2, otherNodePair._1),
             (nodePair._2, otherNodePair._2)
           ).foreach { pair =>
-            graph.addEdge(
-              pair._1,
-              pair._2.ind,
-              gapPenalty * (math.abs(pair._1.pos._1 - pair._2.pos._1) + math.abs(pair._1.pos._2 - pair._2.pos._2))
-            )
+            if (pair._2.pos._1 >= pair._1.pos._1 && pair._2.pos._2 >= pair._1.pos._2) {
+              graph.addEdge(
+                pair._1,
+                pair._2.ind,
+                gapPenalty * ((pair._2.pos._1 - pair._1.pos._1) + (pair._2.pos._2 - pair._1.pos._2))
+              )
+            }
           }
         }
       }

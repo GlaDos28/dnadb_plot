@@ -1,29 +1,23 @@
-
 import java.util.concurrent.Executors
 
 import monix.eval.Task
 import monix.execution.Scheduler
-import ru.bmstu.bioinformatics.Utils
-import ru.bmstu.bioinformatics.Utils._
 import ru.bmstu.bioinformatics.algo.input.SeqPair
-import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.algo.util.DotPlot.SubstringMap
 import ru.bmstu.bioinformatics.algo.util.diagGraph.DiagGraph
 import ru.bmstu.bioinformatics.algo.util.{DiagSum, DotPlot, Strip}
-import ru.bmstu.bioinformatics.algo_legacy.SmithWatermanRaw
-import ru.bmstu.bioinformatics.database.converted.{Converter, DatabaseOperator}
-import ru.bmstu.bioinformatics.database.initial.{FileReader => OldDbReader}
-import ru.bmstu.bioinformatics.scoring.SubstringMatchMatrix.SubstringMatchMatrix
+import ru.bmstu.bioinformatics.database.converted.DatabaseOperator
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
-import ru.bmstu.bioinformatics.scoring.{SubstringMatchMatrix, WeightMatrix}
+import ru.bmstu.bioinformatics.scoring.WeightMatrix
 
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.ExecutionContext
 
 object Application {
 
-  val gapPenalty:     Int = -2 // Штраф за гэп
-  val diagonalFilter: Int = 10 // Число отбираемых диагоналей
-  val cutoffScore:    Int = 28 // Минимальный score диагонали
+  val gapPenalty:     Int     = -2   // Штраф за гэп
+  val diagonalFilter: Int     = 10   // Число отбираемых диагоналей
+  val cutoffScore:    Int     = 28   // Минимальный score диагонали
+  val putAlign:       Boolean = true // Печатать ли выравнивание
 
   def main(args: Array[String]): Unit = {
     //todo save bin?
@@ -85,11 +79,19 @@ object Application {
         }
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
-        val strip              = new Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
-        val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
+        val strip              = Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
+        val alignRes           = if (putAlign)
+            strip.smithWatermanScoreAlign(gapPenalty)(seqPair, weightMatrix) else
+            strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {
           println(id, alignRes.score, (System.currentTimeMillis() - timestart).toFloat / 1000)
+
+            if (putAlign && alignRes.score > 0) {
+                println(alignRes.align.get)
+            }
+
+            println
         }
       }
     }
