@@ -61,11 +61,11 @@ case class Strip(diags: IndexedSeq[Diagonal]) extends AnyVal {
       curLastColInd  = math.min(math.max(-topBound + cnt, 0), seqPair.s2.length - 1)
     }
 
-    AlignResult(maxScore, None)
+    AlignResult(maxScore)
   }
 
   def smithWatermanScoreAlign(gapPenalty: Int)
-                             (seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
+                             (seqPair: SeqPair, scoreTable: KeyMatrix): String = {
 
     val topBound    = rightOffset
     val bottomBound = leftOffset
@@ -158,7 +158,7 @@ case class Strip(diags: IndexedSeq[Diagonal]) extends AnyVal {
     //s1Builder.append(seqPair.s1(curRow))
     //s2Builder.append(seqPair.s2(curCol))
 
-    AlignResult(maxScore, Some(s1Builder.toString + "\n" + s2Builder.toString))
+    s1Builder.toString + "\n" + s2Builder.toString
   }
 
   def leftOffset: Int = diags.head.offset

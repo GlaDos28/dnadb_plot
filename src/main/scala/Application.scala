@@ -3,10 +3,12 @@ import java.util.concurrent.Executors
 import monix.eval.Task
 import monix.execution.Scheduler
 import ru.bmstu.bioinformatics.algo.input.SeqPair
+import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.algo.util.DotPlot.SubstringMap
 import ru.bmstu.bioinformatics.algo.util.diagGraph.DiagGraph
 import ru.bmstu.bioinformatics.algo.util.{DiagSum, DotPlot, Strip}
 import ru.bmstu.bioinformatics.database.converted.DatabaseOperator
+import ru.bmstu.bioinformatics.database.initial.DbEntry
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 import ru.bmstu.bioinformatics.scoring.WeightMatrix
 
@@ -58,6 +60,28 @@ object Application {
     System.exit(0)
   }
 
+  private def printAlign(seq1: String,
+                        seq2: String,
+                        weightMatrix: KeyMatrix,
+                        substrings1: SubstringMap,
+                        substrings2: SubstringMap): String = {
+      val seqPair = SeqPair(seq1, seq2)
+
+      val diagSum = DiagSum.fromSubstringMaps(substrings1, substrings2, seqPair.s1.length, seqPair.s2.length, 2)
+      val bestTrimDiags = diagSum.bestTrim(diagonalFilter, seqPair, weightMatrix)
+      var cutDiags = bestTrimDiags.filter(_.getScore(weightMatrix) >= cutoffScore).toVector
+
+      if (cutDiags.isEmpty) {
+          cutDiags = Vector(bestTrimDiags.maxBy(_.getScore(weightMatrix)))
+      }
+
+      val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
+      val strip              = Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
+      val align              = strip.smithWatermanScoreAlign(gapPenalty)(seqPair, weightMatrix)
+
+      align
+  }
+
   private def processDb(seq: String,
                         weightMatrix: KeyMatrix,
                         substrings: SubstringMap,
@@ -80,18 +104,10 @@ object Application {
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
         val strip              = Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
-        val alignRes           = if (putAlign)
-            strip.smithWatermanScoreAlign(gapPenalty)(seqPair, weightMatrix) else
-            strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
+        val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {
           println(id, alignRes.score, (System.currentTimeMillis() - timestart).toFloat / 1000)
-
-            if (putAlign && alignRes.score > 0) {
-                println(alignRes.align.get)
-            }
-
-            println
         }
       }
     }
