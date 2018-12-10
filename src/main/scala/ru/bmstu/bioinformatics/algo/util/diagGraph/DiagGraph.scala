@@ -10,20 +10,20 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
     var curSize: Int = 0
 
     def addNode(seqPairRef: SeqPair, pos: (Int, Int)): GraphNode = {
-        val node = new GraphNode(curSize, seqPairRef, pos)
-        nodes prepend node
-        curSize += 1
-        node
+      val node = new GraphNode(curSize, seqPairRef, pos)
+      nodes prepend node
+      curSize += 1
+      node
     }
 
     def addEdge(in: GraphNode, outInd: Int, weight: Int, diagRef: Option[SeqPair] = None): GraphEdge = {
-        val edge = new GraphEdge(outInd, weight, diagRef)
-        in.outEdges prepend edge
-        edge
+      val edge = new GraphEdge(outInd, weight, diagRef)
+      in.outEdges prepend edge
+      edge
     }
 
     def getUsedDiags: mutable.Set[SeqPair] = { /* Dijkstra algorithm with maximal path search */
-      val nodesArr = nodes.toArray.sortBy(node => math.min(node.pos._1, node.pos._2))
+      val nodesArr = nodes.sortBy(node => math.min(node.pos._1, node.pos._2)).toArray
       val n        = nodesArr.length
       val dist     = Array.fill(n)(-1000000)
       val was      = Array.fill(n)(false)
@@ -34,14 +34,20 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
       /* Process iterations */
 
       (0 until (n - 1)).foreach { _ =>
-        val maxInd = dist.indices.filterNot(i => was(i)).maxBy(i => dist(i))
+        var maxInd = 0
+        dist.indices.foreach { i =>
+          if (!was(i) && (dist(i) > dist(maxInd))) {
+            maxInd = i
+          }
+        }
+
         was(maxInd) = true
 
-        for (e <- nodesArr(maxInd).outEdges) {
-            if (!was(e.outInd) && dist(e.outInd) < dist(maxInd) + e.weight) {
-                dist(e.outInd) = dist(maxInd) + e.weight
-                prev(e.outInd) = Some(maxInd)
-            }
+        nodesArr(maxInd).outEdges.foreach { e =>
+          if (!was(e.outInd) && dist(e.outInd) < dist(maxInd) + e.weight) {
+            dist(e.outInd) = dist(maxInd) + e.weight
+            prev(e.outInd) = Some(maxInd)
+          }
         }
       }
 
@@ -51,8 +57,8 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
       var curInd    = n - 1
 
       while (prev(curInd).isDefined) {
-          usedDiags += nodesArr(curInd).seqPairRef
-          curInd = prev(curInd).get
+        usedDiags += nodesArr(curInd).seqPairRef
+        curInd = prev(curInd).get
       }
 
       usedDiags += nodesArr(curInd).seqPairRef
