@@ -3,7 +3,7 @@ package ru.bmstu.bioinformatics.algo.input
 import ru.bmstu.bioinformatics.algo.util.Diagonal
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
-case class SeqPair(s1: String, s2: String, pos: (Int, Int) = (0, 0), diag: Diagonal = Diagonal(0)) {
+case class SeqPair(s1: String, s2: String, pos: (Int, Int) = (0, 0), diag: Diagonal = new Diagonal(0)) {
 
   def getDiagonalSeqs(diag: Diagonal): SeqPair =
     if (diag.offset > 0) {
@@ -53,8 +53,12 @@ case class SeqPair(s1: String, s2: String, pos: (Int, Int) = (0, 0), diag: Diago
 
     val firstInd = firstInds.find(_ <= lastInd).get
 
-    SeqPair(s1.substring(firstInd, lastInd + 1), s2.substring(firstInd, lastInd + 1),
-      (pos._1 + firstInd, pos._2 + firstInd), diag)
+    SeqPair(
+      s1.substring(firstInd, lastInd + 1),
+      s2.substring(firstInd, lastInd + 1),
+      (pos._1 + firstInd, pos._2 + firstInd),
+      diag
+    )
   }
 
   lazy val minLen: Int = math.min(s1.length, s2.length)

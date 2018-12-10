@@ -1,14 +1,13 @@
 package ru.bmstu.bioinformatics.algo.util
 
-import ru.bmstu.bioinformatics.algo.Preamble._
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.util.DotPlot.{DotPlot, SubstringMap}
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
 /* Mutable */
-class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[Int]) {
+class DiagSum(iLen: Int, jLen: Int, k: Int, data: Array[Int]) {
 
-  def this(iLen: Int, jLen: Int, k: Int) = this(iLen, jLen, k, collection.mutable.IndexedSeq.fill(iLen + jLen - 2 * k + 1)(0))
+  def this(iLen: Int, jLen: Int, k: Int) = this(iLen, jLen, k, Array.fill(iLen + jLen - 2 * k + 1)(0))
 
   def getValue(offset: Int): Int = data(offset - minInd)
 
@@ -21,7 +20,7 @@ class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[
     data.indices
       .sortWith(data(_) > data(_))
       .take(math.min(amount, data.length))
-      .map(i => Diagonal(i + minInd))
+      .map(i => new Diagonal(i + minInd))
       .toList
   }
 
@@ -29,17 +28,7 @@ class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[
     data.indices
       .sortWith(data(_) > data(_))
       .take(math.min(amount, data.length))
-      .map(i => seqPair.getDiagonalSeqs(Diagonal(i + minInd)).trimmedToMaxLocal(weightMatrix))
-  }
-
-  override def toString: String = {
-    val offsets = minInd to maxInd
-    val maxElemLen = math.max(data.maxElemLen, offsets.maxElemLen)
-
-    new StringBuilder()
-      .append("I | ").append(offsets.mkTabbedString(maxElemLen)).append("\n")
-      .append("S | ").append(data.mkTabbedString(maxElemLen))
-      .toString
+      .map(i => seqPair.getDiagonalSeqs(new Diagonal(i + minInd)).trimmedToMaxLocal(weightMatrix))
   }
 }
 

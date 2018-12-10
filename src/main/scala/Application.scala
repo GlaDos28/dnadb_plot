@@ -37,9 +37,9 @@ object Application {
 //    val converted = Converter.convert(OldDbReader.read(Utils.resourceURL("uniprot_sprot.fasta")))
 //    DatabaseOperator.write(converted)
 
-    val parFactor = 10
+    val parFactor = 16
 
-    implicit val ec: Scheduler = Scheduler(Executors.newFixedThreadPool(parFactor))
+    implicit val ec: Scheduler = Scheduler(Executors.newWorkStealingPool(parFactor))
 
     val recordsCount = DatabaseOperator.count()
     val chunk = recordsCount / parFactor
@@ -52,7 +52,8 @@ object Application {
         substrings = substrings,
         from = i * chunk,
         to = (i + 1) * chunk,
-        timestart = timestart)
+        timestart = timestart
+      )
     })
 
     res.runSyncUnsafe()
@@ -84,7 +85,7 @@ object Application {
         }
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
-        val strip              = Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
+        val strip              = new Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
         val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {

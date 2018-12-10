@@ -8,7 +8,7 @@ object Preamble {
     def colorify(col: String): String = col + s + ColorNone
   }
 
-  implicit class ExtraTraversableOnceOps[T](seq: Seq[T]) {
+  implicit class ExtraTraversableOnceOps[T](seq: TraversableOnce[T]) {
     def maxElemLen: Int = (0 /: seq.map(_.toString.length)) (math.max)
 
     def mkTabbedString(maxElemLen: Int,

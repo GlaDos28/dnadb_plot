@@ -3,6 +3,7 @@ package ru.bmstu.bioinformatics.algo.util.diagGraph
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
@@ -21,44 +22,44 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
         edge
     }
 
-    def getUsedDiags: Set[SeqPair] = { /* Dijkstra algorithm with maximal path search */
-        val nodesArr = nodes.toArray.sortBy(node => math.min(node.pos._1, node.pos._2))
-        val n        = nodesArr.length
-        val dist     = Array.fill(n)(-1000000)
-        val was      = Array.fill(n)(false)
-        val prev     = Array.fill[Option[Int]](n)(None)
+    def getUsedDiags: mutable.Set[SeqPair] = { /* Dijkstra algorithm with maximal path search */
+      val nodesArr = nodes.toArray.sortBy(node => math.min(node.pos._1, node.pos._2))
+      val n        = nodesArr.length
+      val dist     = Array.fill(n)(-1000000)
+      val was      = Array.fill(n)(false)
+      val prev     = Array.fill[Option[Int]](n)(None)
 
-        dist(0) = 0
+      dist(0) = 0
 
-        /* Process iterations */
+      /* Process iterations */
 
-        for (_ <- 0 until (n - 1)) {
-            val maxInd = dist.indices.filterNot(i => was(i)).maxBy(i => dist(i))
-            was(maxInd) = true
+      (0 until (n - 1)).foreach { _ =>
+        val maxInd = dist.indices.filterNot(i => was(i)).maxBy(i => dist(i))
+        was(maxInd) = true
 
-            for (e <- nodesArr(maxInd).outEdges) {
-                if (!was(e.outInd) && dist(e.outInd) < dist(maxInd) + e.weight) {
-                    dist(e.outInd) = dist(maxInd) + e.weight
-                    prev(e.outInd) = Some(maxInd)
-                }
+        for (e <- nodesArr(maxInd).outEdges) {
+            if (!was(e.outInd) && dist(e.outInd) < dist(maxInd) + e.weight) {
+                dist(e.outInd) = dist(maxInd) + e.weight
+                prev(e.outInd) = Some(maxInd)
             }
         }
+      }
 
-        /* Recover path */
+      /* Recover path */
 
-        var usedDiags = Set.empty[SeqPair]
-        var curInd    = n - 1
+      val usedDiags = mutable.Set.empty[SeqPair]
+      var curInd    = n - 1
 
-        while (prev(curInd).isDefined) {
-            usedDiags += nodesArr(curInd).seqPairRef
-            curInd = prev(curInd).get
-        }
+      while (prev(curInd).isDefined) {
+          usedDiags += nodesArr(curInd).seqPairRef
+          curInd = prev(curInd).get
+      }
 
-        usedDiags += nodesArr(curInd).seqPairRef
+      usedDiags += nodesArr(curInd).seqPairRef
 
-        /* Return result */
+      /* Return result */
 
-        usedDiags
+      usedDiags
     }
 }
 
@@ -78,7 +79,8 @@ object DiagGraph {
 
         graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore(scoreTable), Some(seqPair))
 
-        nodeMap.iterator.map(_._2).foreach { otherNodePair =>
+        nodeMap.foreach { tup =>
+          val otherNodePair = tup._2
           List(
             (nodePair._1, otherNodePair._1),
             (nodePair._1, otherNodePair._2),

@@ -4,7 +4,7 @@ import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
-case class Strip(diags: IndexedSeq[Diagonal]) extends AnyVal {
+class Strip(val diags: IndexedSeq[Diagonal]) extends AnyVal {
   def smithWatermanScore(gapPenalty: Int)
                         (seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
 

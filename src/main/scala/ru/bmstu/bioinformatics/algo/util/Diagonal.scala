@@ -1,3 +1,3 @@
 package ru.bmstu.bioinformatics.algo.util
 
-case class Diagonal(offset: Int) extends AnyVal
+class Diagonal(val offset: Int) extends AnyVal
