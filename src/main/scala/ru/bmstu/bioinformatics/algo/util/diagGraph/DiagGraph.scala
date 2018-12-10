@@ -64,25 +64,37 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
 
 object DiagGraph {
     def fromDiags(diags: List[SeqPair], gapPenalty: Int)(scoreTable: KeyMatrix): DiagGraph = {
-        val graph   = new DiagGraph()
-        val nodeMap = diags.zip(diags
-            .map(d => graph.addNode(d, d.pos)).zip(diags
-            .map(d => graph.addNode(d, (d.pos._1 + d.minLen, d.pos._2 + d.minLen))))).toMap
+      val graph   = new DiagGraph()
+      val nodeMap = diags.zip(
+        diags
+          .map(d => graph.addNode(d, d.pos))
+          .zip(diags
+            .map(d => graph.addNode(d, (d.pos._1 + d.minLen, d.pos._2 + d.minLen)))
+          )
+      ).toMap
 
-        for ((seqPair, nodePair) <- nodeMap) {
-            graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore(scoreTable), Some(seqPair))
+      nodeMap.foreach { tup =>
+        val seqPair = tup._1
+        val nodePair = tup._2
 
-            for (otherNodePair <- nodeMap.values) {
-                (   (nodePair._1, otherNodePair._1) ::
-                    (nodePair._1, otherNodePair._2) ::
-                    (nodePair._2, otherNodePair._1) ::
-                    (nodePair._2, otherNodePair._2) ::
-                    Nil
-                ).foreach(pair => graph.addEdge(pair._1, pair._2.ind, gapPenalty *
-                    (math.abs(pair._1.pos._1 - pair._2.pos._1) + math.abs(pair._1.pos._2 - pair._2.pos._2))))
-            }
+        graph.addEdge(nodePair._1, nodePair._2.ind, seqPair.getScore(scoreTable), Some(seqPair))
+
+        nodeMap.valuesIterator.foreach { otherNodePair =>
+          List(
+            (nodePair._1, otherNodePair._1),
+            (nodePair._1, otherNodePair._2),
+            (nodePair._2, otherNodePair._1),
+            (nodePair._2, otherNodePair._2)
+          ).foreach { pair =>
+            graph.addEdge(
+              pair._1,
+              pair._2.ind,
+              gapPenalty * (math.abs(pair._1.pos._1 - pair._2.pos._1) + math.abs(pair._1.pos._2 - pair._2.pos._2))
+            )
+          }
         }
+      }
 
-        graph
+      graph
     }
 }

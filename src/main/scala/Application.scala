@@ -26,20 +26,19 @@ object Application {
   val cutoffScore:    Int = 28 // Минимальный score диагонали
 
   def main(args: Array[String]): Unit = {
+    //todo save bin?
     val weightMatrix = WeightMatrix.readDefault
     val ssmm = SubstringMatchMatrix(WeightMatrix.readDefault)
 
     val seq = "MVHLTPEEKSAVTALWGKVNVDEVGGEALGRLLVVYPWTQRFFESFGDLSTPDAVMGNPKVKAHGKKVLGAFSDGLAHLDNLKGTFATLSELHCDKLHVDPENFRLLGNVLVCVLAHHFGKEFTPPVQAAYQKVVAGVANALAHKYH"
 
     val substrings = DotPlot.substringsMap(seq)
-    var max: (String, Int) = ("", Int.MinValue)
-    var max2: (String, Int) = ("", Int.MinValue)
 
 //    DatabaseOperator.init()
 //    val converted = Converter.convert(OldDbReader.read(Utils.resourceURL("uniprot_sprot.fasta")))
 //    DatabaseOperator.write(converted)
 
-    val parFactor = 8
+    val parFactor = 10
 
     implicit val ec: Scheduler = Scheduler(Executors.newFixedThreadPool(parFactor))
 
@@ -61,9 +60,6 @@ object Application {
     res.runSyncUnsafe()
 
     println("Total time:", System.currentTimeMillis() - timestart)
-
-    println(max)
-    println(max2)
 
     DatabaseOperator.close()
     System.exit(0)
@@ -94,7 +90,7 @@ object Application {
         }
 
         val graphFilteredDiags = DiagGraph.fromDiags(cutDiags, gapPenalty)(weightMatrix).getUsedDiags
-        val strip              = new Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
+        val strip              = Strip(graphFilteredDiags.toVector.map(_.diag).sortBy(_.offset)(Ordering.Int.reverse))
         val alignRes           = strip.smithWatermanScore(gapPenalty)(seqPair, weightMatrix)
 
         if (id % 10000 == 0) {

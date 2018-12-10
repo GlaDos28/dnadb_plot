@@ -10,7 +10,8 @@ class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[
 
   def getValue(offset: Int): Int = data(offset - minInd)
 
-  def minInd: Int = -jLen + k
+  lazy val minInd: Int = -jLen + k
+  lazy val maxInd: Int = iLen - k
 
   def inc(offset: Int): Unit = data(offset - minInd) += 1
 
@@ -31,15 +32,15 @@ class DiagSum(iLen: Int, jLen: Int, k: Int, data: collection.mutable.IndexedSeq[
       .append("S | ").append(data.mkTabbedString(maxElemLen))
       .toString
   }
-
-  def maxInd: Int = iLen - k
 }
 
 object DiagSum {
   def fromDotMatrix(dm: DotPlot, rowNum: Int, colNum: Int, k: Int): DiagSum = {
     val diagSum = new DiagSum(rowNum, colNum, k)
 
-    for (((i, j), _) <- dm.iterator) {
+    dm.foreach { tup =>
+      val i = tup._1._1
+      val j = tup._1._2
       diagSum.inc(i - j)
     }
 
