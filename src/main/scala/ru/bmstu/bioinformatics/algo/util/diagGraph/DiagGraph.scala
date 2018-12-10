@@ -10,14 +10,14 @@ class DiagGraph(nodes: ListBuffer[GraphNode] = ListBuffer.empty) {
     var curSize: Int = 0
 
     def addNode(seqPairRef: SeqPair, pos: (Int, Int)): GraphNode = {
-      val node = new GraphNode(curSize, seqPairRef, pos)
+      val node = GraphNode(curSize, seqPairRef, pos)
       nodes prepend node
       curSize += 1
       node
     }
 
     def addEdge(in: GraphNode, outInd: Int, weight: Int, diagRef: Option[SeqPair] = None): GraphEdge = {
-      val edge = new GraphEdge(outInd, weight, diagRef)
+      val edge = GraphEdge(outInd, weight, diagRef)
       in.outEdges prepend edge
       edge
     }

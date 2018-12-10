@@ -2,4 +2,4 @@ package ru.bmstu.bioinformatics.algo.util.diagGraph
 
 import ru.bmstu.bioinformatics.algo.input.SeqPair
 
-class GraphEdge(val outInd: Int, val weight: Int, val diagRef: Option[SeqPair] = None)
+case class GraphEdge(outInd: Int, weight: Int, diagRef: Option[SeqPair] = None)

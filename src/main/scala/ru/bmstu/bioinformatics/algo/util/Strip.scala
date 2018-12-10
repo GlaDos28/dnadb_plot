@@ -4,7 +4,7 @@ import ru.bmstu.bioinformatics.algo.input.SeqPair
 import ru.bmstu.bioinformatics.algo.output.AlignResult
 import ru.bmstu.bioinformatics.scoring.WeightMatrix.KeyMatrix
 
-class Strip(val diags: IndexedSeq[Diagonal]) extends AnyVal {
+case class Strip(diags: IndexedSeq[Diagonal]) extends AnyVal {
   def smithWatermanScore(gapPenalty: Int)
                         (seqPair: SeqPair, scoreTable: KeyMatrix): AlignResult = {
 
@@ -30,7 +30,8 @@ class Strip(val diags: IndexedSeq[Diagonal]) extends AnyVal {
     while (i < seqPair.s1.length && curFirstColInd < seqPair.s2.length) {
       newRowScore(0) = -1000000 /* To prevent using non-strip elements */
 
-      for (j <- curFirstColInd to curLastColInd) {
+      var j = curFirstColInd
+      while (j <= curLastColInd) {
         val stScore      = scoreTable(seqPair.s1(i))(seqPair.s2(j))
         val leftScore    = newRowScore.last
         val topScore     = rowScore(j - curFirstColInd + 2)
@@ -46,6 +47,7 @@ class Strip(val diags: IndexedSeq[Diagonal]) extends AnyVal {
         }
 
         newRowScore(j - curFirstColInd + 1) = score
+        j += 1
       }
 
       newRowScore(curLastColInd - curFirstColInd + 2) = -1000000 /* To prevent using non-strip elements */

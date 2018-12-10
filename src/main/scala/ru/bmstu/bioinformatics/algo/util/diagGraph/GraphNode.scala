@@ -4,4 +4,4 @@ import ru.bmstu.bioinformatics.algo.input.SeqPair
 
 import scala.collection.mutable.ListBuffer
 
-class GraphNode(val ind: Int, val seqPairRef: SeqPair, val pos: (Int, Int), val outEdges: ListBuffer[GraphEdge] = ListBuffer.empty)
+case class GraphNode(ind: Int, seqPairRef: SeqPair, pos: (Int, Int), outEdges: ListBuffer[GraphEdge] = ListBuffer.empty)
